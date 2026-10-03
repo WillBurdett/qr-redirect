@@ -68,7 +68,6 @@ class UnitTests {
     }
 
     /** Rebuilds the module grid from the SVG path and compares it to what ZXing produced. */
-    @Disabled
     @Test
     void svgPathMatchesTheRealQrMatrix() throws Exception {
         String content = "https://qr.example.com/q/Ab3xK9z";

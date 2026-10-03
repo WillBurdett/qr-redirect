@@ -50,7 +50,8 @@ public class QrImageService {
      */
     public String svg(String content, ErrorCorrectionLevel ec) {
         // 0x0 asks ZXing for the smallest matrix: 1 unit per module, quiet zone included.
-        BitMatrix m = encode(content, 0, 0, ec);
+        BitMatrix m = moduleMatrix(content, ec);
+
         int w = m.getWidth();
         int h = m.getHeight();
 
@@ -80,11 +81,15 @@ public class QrImageService {
         return sb.toString();
     }
 
+    /** Smallest possible matrix: one cell per module, quiet zone included (0x0 asks ZXing for no scaling). */
+    private BitMatrix moduleMatrix(String content, ErrorCorrectionLevel ec) {
+        return encode(content, 0, 0, ec);
+    }
+
     private BitMatrix encode(String content, int width, int height, ErrorCorrectionLevel ec) {
         Map<EncodeHintType, Object> hints = Map.of(
                 EncodeHintType.ERROR_CORRECTION, ec,
-                EncodeHintType.MARGIN, QUIET_ZONE,
-                EncodeHintType.CHARACTER_SET, "UTF-8");
+                EncodeHintType.MARGIN, QUIET_ZONE);
         try {
             return new QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, width, height, hints);
         } catch (WriterException e) {
