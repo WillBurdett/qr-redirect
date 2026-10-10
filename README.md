@@ -94,7 +94,7 @@ Dockerfile and offers managed Postgres.
   entry immediately on the instance that handled them. If you run several instances, a change can take up to
   the TTL to reach the others. Misses are never cached.
 - **Target URL rules:** https only, host required, no embedded credentials, max 2048 chars.
-- **Schema** is created by Hibernate (`ddl-auto=update`). Fine for an MVP, so move to Flyway before real data matters.
+- **Schema** is managed by Flyway (`ddl-auto=update`).
 
 ## Project layout
 

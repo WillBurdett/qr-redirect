@@ -29,13 +29,15 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 
+import org.springframework.context.annotation.Import;
+
 @SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:h2:mem:qrtest;DB_CLOSE_DELAY=-1",
         "app.base-url=https://qr.example.com",
         "app.api-keys.acme=acme-key",
         "app.api-keys.globex=globex-key"
 })
 @AutoConfigureMockMvc
+@Import(TestcontainersConfiguration.class)
 class QrRedirectFlowTest {
 
     private static final String KEY = "X-API-Key";
