@@ -67,7 +67,7 @@ to it, so one company can't see or change another's codes.
 | Setting | Env var | Default | Purpose |
 |---|---|---|---|
 | `app.base-url` | `APP_BASE_URL` | `http://localhost:8080` | Public URL baked into every QR code. **Set it to your real domain before printing anything.** |
-| `app.api-keys.<company>` | `APP_APIKEYS_<COMPANY>` | demo key in `dev` profile only | One key per company. Company ids from env vars come through lower-cased. |
+| `app.api-key` | `APP_APIKEY` | demo key in `dev` profile only | One key per company. Company ids from env vars come through lower-cased. |
 | `app.allow-http` | `APP_ALLOWHTTP` | `false` | Accept `http://` targets (https only by default). |
 | (port) | `PORT` | `8080` | |
 
