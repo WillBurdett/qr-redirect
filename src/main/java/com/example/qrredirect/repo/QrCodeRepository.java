@@ -13,7 +13,7 @@ public interface QrCodeRepository extends JpaRepository<QrCode, Long> {
 
     boolean existsByShortCode(String shortCode);
 
-    List<QrCode> findByCompanyIdOrderByCreatedAtDesc(String companyId);
+    List<QrCode> findAllByOrderByCreatedAtDesc();
 
-    Optional<QrCode> findByIdAndCompanyId(Long id, String companyId);
+    List<QrCode> findByCompanyIdOrderByCreatedAtDesc(Long companyId);
 }

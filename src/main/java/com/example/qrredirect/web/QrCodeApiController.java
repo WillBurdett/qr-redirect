@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +29,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import jakarta.validation.Valid;
 
-/** Management API. Every call is scoped to the company that owns the API key. */
+/** Operator-only management of QR codes. */
 @RestController
 @RequestMapping("/api/codes")
 public class QrCodeApiController {
@@ -47,28 +46,25 @@ public class QrCodeApiController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CodeResponse create(@RequestAttribute(ApiKeyFilter.COMPANY_ATTRIBUTE) String companyId,
-                               @Valid @RequestBody CreateCodeRequest request) {
-        return toResponse(service.create(companyId, request.targetUrl()));
+    public CodeResponse create(@Valid @RequestBody CreateCodeRequest request) {
+        return toResponse(service.create(request.companyId(), request.targetUrl()));
     }
 
+    /** All codes, newest first. Add ?companyId=1 to see one company's codes. */
     @GetMapping
-    public List<CodeResponse> list(@RequestAttribute(ApiKeyFilter.COMPANY_ATTRIBUTE) String companyId) {
+    public List<CodeResponse> list(@RequestParam(required = false) Long companyId) {
         return service.list(companyId).stream().map(this::toResponse).toList();
     }
 
     @GetMapping("/{id}")
-    public CodeResponse get(@RequestAttribute(ApiKeyFilter.COMPANY_ATTRIBUTE) String companyId,
-                            @PathVariable Long id) {
-        return toResponse(service.get(companyId, id));
+    public CodeResponse get(@PathVariable Long id) {
+        return toResponse(service.get(id));
     }
 
     /** Reassign where a code points, or switch it off with {"active": false}. */
     @PutMapping("/{id}")
-    public CodeResponse update(@RequestAttribute(ApiKeyFilter.COMPANY_ATTRIBUTE) String companyId,
-                               @PathVariable Long id,
-                               @RequestBody UpdateCodeRequest request) {
-        return toResponse(service.update(companyId, id, request.targetUrl(), request.active()));
+    public CodeResponse update(@PathVariable Long id, @RequestBody UpdateCodeRequest request) {
+        return toResponse(service.update(id, request.targetUrl(), request.active()));
     }
 
     /**
@@ -76,12 +72,11 @@ public class QrCodeApiController {
      * Use SVG for print. Use Q or H if you plan to overlay a logo.
      */
     @GetMapping("/{id}/image")
-    public ResponseEntity<?> image(@RequestAttribute(ApiKeyFilter.COMPANY_ATTRIBUTE) String companyId,
-                                   @PathVariable Long id,
+    public ResponseEntity<?> image(@PathVariable Long id,
                                    @RequestParam(defaultValue = "png") String format,
                                    @RequestParam(defaultValue = "512") int size,
                                    @RequestParam(defaultValue = "M") String ec) {
-        QrCode qr = service.get(companyId, id);
+        QrCode qr = service.get(id);
         String content = images.shortUrl(qr.getShortCode());
         ErrorCorrectionLevel level = parseLevel(ec);
 

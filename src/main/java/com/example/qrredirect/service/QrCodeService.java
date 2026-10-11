@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.qrredirect.model.Company;
 import com.example.qrredirect.model.QrCode;
 import com.example.qrredirect.repo.QrCodeRepository;
 
@@ -24,16 +25,20 @@ public class QrCodeService {
     private static final int MAX_CODE_ATTEMPTS = 5;
 
     private final QrCodeRepository repo;
+    private final CompanyService companies;
     private final ShortCodeGenerator generator;
     private final TargetUrlPolicy policy;
 
-    public QrCodeService(QrCodeRepository repo, ShortCodeGenerator generator, TargetUrlPolicy policy) {
+    public QrCodeService(QrCodeRepository repo, CompanyService companies,
+                         ShortCodeGenerator generator, TargetUrlPolicy policy) {
         this.repo = repo;
+        this.companies = companies;
         this.generator = generator;
         this.policy = policy;
     }
 
-    public QrCode create(String companyId, String targetUrl) {
+    public QrCode create(Long companyId, String targetUrl) {
+        Company company = companies.get(companyId);   // 404 if it doesn't exist
         String url = policy.validate(targetUrl);
 
         for (int attempt = 0; attempt < MAX_CODE_ATTEMPTS; attempt++) {
@@ -43,7 +48,7 @@ public class QrCodeService {
             }
             QrCode qr = new QrCode();
             qr.setShortCode(shortCode);
-            qr.setCompanyId(companyId);
+            qr.setCompany(company);
             qr.setTargetUrl(url);
             try {
                 return repo.saveAndFlush(qr);
@@ -65,20 +70,22 @@ public class QrCodeService {
                 .map(QrCode::getTargetUrl);
     }
 
-    public List<QrCode> list(String companyId) {
-        return repo.findByCompanyIdOrderByCreatedAtDesc(companyId);
+    /** All codes, newest first, or just one company's when companyId is given. */
+    public List<QrCode> list(Long companyId) {
+        return companyId == null
+                ? repo.findAllByOrderByCreatedAtDesc()
+                : repo.findByCompanyIdOrderByCreatedAtDesc(companyId);
     }
 
-    /** Looks up a code owned by this company. Other companies' codes look like they don't exist. */
-    public QrCode get(String companyId, Long id) {
-        return repo.findByIdAndCompanyId(id, companyId)
+    public QrCode get(Long id) {
+        return repo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QR code not found"));
     }
 
     /** Reassigns and/or (de)activates a code. Null arguments are left unchanged. */
     @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
-    public QrCode update(String companyId, Long id, String targetUrl, Boolean active) {
-        QrCode qr = get(companyId, id);
+    public QrCode update(Long id, String targetUrl, Boolean active) {
+        QrCode qr = get(id);
         if (targetUrl != null) {
             qr.setTargetUrl(policy.validate(targetUrl));
         }

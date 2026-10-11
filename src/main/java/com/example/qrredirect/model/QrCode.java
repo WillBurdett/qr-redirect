@@ -2,6 +2,9 @@ package com.example.qrredirect.model;
 
 import java.time.Instant;
 
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,8 +28,10 @@ public class QrCode {
     @Column(name = "short_code", nullable = false, unique = true, length = 16, updatable = false)
     private String shortCode;
 
-    @Column(name = "company_id", nullable = false, length = 64, updatable = false)
-    private String companyId;
+    /** The company this code belongs to. Fixed at creation. */
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "company_id", nullable = false, updatable = false)
+    private Company company;
 
     /** Where scanners are sent. This is the part companies reassign. */
     @Column(name = "target_url", nullable = false, length = 2048)
@@ -58,8 +63,8 @@ public class QrCode {
     public String getShortCode() { return shortCode; }
     public void setShortCode(String shortCode) { this.shortCode = shortCode; }
 
-    public String getCompanyId() { return companyId; }
-    public void setCompanyId(String companyId) { this.companyId = companyId; }
+    public Company getCompany() { return company; }
+    public void setCompany(Company company) { this.company = company; }
 
     public String getTargetUrl() { return targetUrl; }
     public void setTargetUrl(String targetUrl) { this.targetUrl = targetUrl; }

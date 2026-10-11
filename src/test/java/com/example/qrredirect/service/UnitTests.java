@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,8 +21,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 class UnitTests {
 
-    private static final AppProperties PROPS = new AppProperties("https://qr.example.com/", false, Map.of());
-
+    private static final AppProperties PROPS = new AppProperties("https://qr.example.com/", false, null);
     @Test
     void shortCodesAreRightLengthBase62AndDoNotRepeat() {
         ShortCodeGenerator generator = new ShortCodeGenerator();
