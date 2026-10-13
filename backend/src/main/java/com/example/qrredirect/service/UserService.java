@@ -2,7 +2,6 @@ package com.example.qrredirect.service;
 
 import com.example.qrredirect.model.User;
 import com.example.qrredirect.repo.UserRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
