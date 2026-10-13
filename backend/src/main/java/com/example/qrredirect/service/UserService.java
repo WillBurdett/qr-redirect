@@ -40,36 +40,18 @@ public class UserService {
         return email == null ? "" : email.trim().toLowerCase();
     }
 
-//    only used for devSeeds
-    public User create(String rawName, String rawEmail, String password) {
-        String name = rawName == null ? "" : rawName.trim();
-        if (name.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name is required");
-        }
-
+    //    only used for devSeeds
+    public User create(String name, String rawEmail, String password) {
         String email = normalizeEmail(rawEmail);
-        if (email.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email is required");
-        }
-
-        if (password == null || password.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password is required");
-        }
-
         if (repo.existsByEmail(email)) {
             throw duplicate();
         }
 
         User user = new User();
-        user.setName(name);
+        user.setName(name.trim());
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
-
-        try {
-            return repo.saveAndFlush(user);
-        } catch (DataIntegrityViolationException e) {
-            throw duplicate();
-        }
+        return repo.save(user);
     }
 
     private static ResponseStatusException duplicate() {
