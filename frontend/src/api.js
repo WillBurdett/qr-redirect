@@ -26,4 +26,6 @@ export const api = {
     listCodes: () => request('/api/codes'),
     createCode: (companyId, targetUrl) =>
         request('/api/codes', { method: 'POST', body: JSON.stringify({ companyId, targetUrl }) }),
+    updateCode: (codeId, targetUrl) =>
+        request(`/api/codes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
 };

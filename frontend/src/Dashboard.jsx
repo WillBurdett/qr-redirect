@@ -7,6 +7,7 @@ export default function Dashboard() {
     const [companyId, setCompanyId] = useState('');
     const [targetUrl, setTargetUrl] = useState('');
     const [newCompany, setNewCompany] = useState('');
+    const [id, setId] = useState('');
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -44,6 +45,17 @@ export default function Dashboard() {
         }
     }
 
+    async function updateCode(e) {
+        e.preventDefault();
+        setError('');
+        try {
+            await api.updateCode(Number(id), targetUrl);
+            setCodes(await api.listCodes());
+        } catch (err) {
+            setError(err.message);
+        }
+    }
+
     return (
         <div>
             {error && <p style={{ color: 'crimson' }}>{error}</p>}
@@ -64,6 +76,15 @@ export default function Dashboard() {
                 <input type="url" value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)}
                     placeholder="https://example.com/menu" required />
                 <button disabled={!companyId}>Create QR code</button>
+            </form>
+
+            <h2>Update QR code</h2>
+            <form onSubmit={updateCode} style={{ display: 'grid', gap: 8, maxWidth: 400 }}>
+                <input type="id" value={id} onChange={(e) => setId(e.target.value)}
+                    placeholder="1" required />
+                <input type="url" value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)}
+                    placeholder="https://example.com/menu" required />
+                <button disabled={!companyId}>Update QR code</button>
             </form>
 
             <h2>Your codes</h2>
