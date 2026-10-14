@@ -1,5 +1,6 @@
 import { useAuth } from './AuthContext';
 import AuthPage from './AuthPage';
+import Dashboard from './Dashboard';
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -8,10 +9,12 @@ export default function App() {
   if (!user) return <AuthPage />;
 
   return (
-    <div style={{ maxWidth: 480, margin: '4rem auto' }}>
-      <h1>Hi {user.name}</h1>
-      <p>{user.email}</p>
-      <button onClick={logout}>Log out</button>
+    <div style={{ maxWidth: 640, margin: '2rem auto' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span>{user.name} ({user.email})</span>
+        <button onClick={logout}>Log out</button>
+      </header>
+      <Dashboard />
     </div>
   );
 }
