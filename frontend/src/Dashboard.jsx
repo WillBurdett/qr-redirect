@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import Toggle from './Toggle';
+import ConfirmDialog from './ConfirmDialog';
 
 export default function Dashboard() {
     const [companies, setCompanies] = useState([]);
@@ -8,7 +10,11 @@ export default function Dashboard() {
     const [targetUrl, setTargetUrl] = useState('');
     const [newCompany, setNewCompany] = useState('');
     const [id, setId] = useState('');
+    const [togglingId, setTogglingId] = useState(null);
     const [error, setError] = useState('');
+    const [pendingDelete, setPendingDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
+    const [updateUrl, setUpdateUrl] = useState('');
 
     useEffect(() => {
         Promise.all([api.listCompanies(), api.listCodes()])
@@ -49,10 +55,38 @@ export default function Dashboard() {
         e.preventDefault();
         setError('');
         try {
-            await api.updateCode(Number(id), targetUrl);
+            await api.updateCode(Number(id), updateUrl);
             setCodes(await api.listCodes());
         } catch (err) {
             setError(err.message);
+        }
+    }
+
+    async function confirmDelete() {
+        const target = pendingDelete;
+        setError('');
+        setDeleting(true);
+        try {
+            await api.deleteCode(target.id);
+            setCodes((current) => current.filter((c) => c.id !== target.id));
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setDeleting(false);
+            setPendingDelete(null);
+        }
+    }
+
+    async function toggleActive(qr) {
+        setError('');
+        setTogglingId(qr.id);
+        try {
+            const updated = await api.codeStatus(qr.id, { active: !qr.active });
+            setCodes(codes.map((c) => (c.id === updated.id ? updated : c)));
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setTogglingId(null);
         }
     }
 
@@ -82,7 +116,7 @@ export default function Dashboard() {
             <form onSubmit={updateCode} style={{ display: 'grid', gap: 8, maxWidth: 400 }}>
                 <input type="id" value={id} onChange={(e) => setId(e.target.value)}
                     placeholder="1" required />
-                <input type="url" value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)}
+                <input type="url" value={updateUrl} onChange={(e) => setUpdateUrl(e.target.value)}
                     placeholder="https://example.com/menu" required />
                 <button disabled={!companyId}>Update QR code</button>
             </form>
@@ -90,13 +124,39 @@ export default function Dashboard() {
             <h2>Your codes</h2>
             <div style={{ display: 'grid', gap: 16 }}>
                 {codes.map((qr) => (
-                    <div key={qr.id} style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                        <img src={`/api/codes/${qr.id}/image?format=png&size=160&label=true`} alt={qr.shortCode} width={160} height={160} />
+                    <div key={qr.id} style={{ display: 'flex', gap: 16, alignItems: 'center', opacity: qr.active ? 1 : 0.5 }}>
+                        <img src={`/api/codes/${qr.id}/image?format=png&size=160&label=true`} alt={qr.shortCode} width={160} />
                         <div>
                             <strong>{qr.companyName}</strong>
                             <div>{qr.targetUrl}</div>
                             <small>{qr.shortUrl}</small>
                         </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Toggle
+                                checked={qr.active}
+                                onChange={() => toggleActive(qr)}
+                                disabled={togglingId === qr.id}
+                                label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortCode}`}
+                            />
+                            <span style={{ color: qr.active ? '#1f9d4a' : '#d92d20', fontWeight: 600 }}>
+                                {qr.active ? 'Active' : 'Inactive'}
+                            </span>
+
+                            <button
+                                onClick={() => setPendingDelete(qr)}
+                                style={{ color: '#d92d20', background: 'none', border: '1px solid #d92d20', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                        <ConfirmDialog
+                            open={pendingDelete !== null}
+                            title="Delete this QR code?"
+                            message={pendingDelete && `${pendingDelete.companyName} (${pendingDelete.shortCode}). Printed copies will stop working. This can't be undone.`}
+                            busy={deleting}
+                            onConfirm={confirmDelete}
+                            onCancel={() => setPendingDelete(null)}
+                        />
                     </div>
                 ))}
             </div>

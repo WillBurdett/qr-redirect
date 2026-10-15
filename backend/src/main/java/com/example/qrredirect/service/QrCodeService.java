@@ -94,4 +94,11 @@ public class QrCodeService {
         }
         return repo.save(qr);
     }
+
+    @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
+    public QrCode delete(Long id) {
+        QrCode qr = get(id);        // 404 if it doesn't exist
+        repo.delete(qr);
+        return qr;                  // returned so the cache key can use its shortCode
+    }
 }

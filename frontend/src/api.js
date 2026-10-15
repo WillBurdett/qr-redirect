@@ -28,4 +28,7 @@ export const api = {
         request('/api/codes', { method: 'POST', body: JSON.stringify({ companyId, targetUrl }) }),
     updateCode: (codeId, targetUrl) =>
         request(`/api/codes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
+    codeStatus: (id, changes) =>
+        request(`/api/codes/${id}`, { method: 'PUT', body: JSON.stringify(changes) }),
+    deleteCode: (codeId) => request(`/api/codes/${codeId}`, { method: 'DELETE' }),
 };
