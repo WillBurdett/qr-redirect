@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -51,14 +52,18 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+//        looks up the session cookies -> false means return null is there isn't any, true would mean "creat a fresh empty session"
+        HttpSession session = request.getSession(false);
+        boolean loggedIn = session != null && session.getAttribute(AuthController.SESSION_USER_ID) != null;
+
         String provided = request.getHeader(HEADER);
-        boolean ok = expected != null
+        boolean keyOk = expected != null
                 && provided != null
                 && MessageDigest.isEqual(provided.getBytes(StandardCharsets.UTF_8), expected);
-        if (!ok) {
+        if (!loggedIn && !keyOk) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write("{\"error\":\"Missing or invalid " + HEADER + " header\"}");
+            response.getWriter().write("{\"error\":\"Not logged in\"}");
             return;
         }
         chain.doFilter(request, response);

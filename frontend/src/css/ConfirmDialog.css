@@ -1,0 +1,45 @@
+.confirm {
+    border: none;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 380px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.confirm::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.confirm h3 {
+    margin: 0 0 8px;
+}
+
+.confirm p {
+    margin: 0 0 20px;
+    color: #444;
+}
+
+.confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.confirm__actions button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+}
+
+.confirm__actions .confirm__danger {
+    background: #d92d20;
+    border-color: #d92d20;
+    color: #fff;
+}
+
+.confirm__actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

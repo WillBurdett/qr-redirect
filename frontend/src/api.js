@@ -7,7 +7,7 @@ async function request(path, options = {}) {
 
     const body = await res.json().catch(() => null);
     if (!res.ok) {
-        const err = new Error(body?.message || 'Something went wrong');
+        const err = new Error(body?.message || body?.error || 'Something went wrong');
         err.status = res.status;
         throw err;
     }
@@ -20,4 +20,15 @@ export const api = {
     login: (email, password) =>
         request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     logout: () => request('/auth/logout', { method: 'POST' }),
+    listCompanies: () => request('/api/companies'),
+    createCompany: (name) =>
+        request('/api/companies', { method: 'POST', body: JSON.stringify({ name }) }),
+    listCodes: () => request('/api/codes'),
+    createCode: (companyId, targetUrl) =>
+        request('/api/codes', { method: 'POST', body: JSON.stringify({ companyId, targetUrl }) }),
+    updateCode: (codeId, targetUrl) =>
+        request(`/api/codes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
+    codeStatus: (id, changes) =>
+        request(`/api/codes/${id}`, { method: 'PUT', body: JSON.stringify(changes) }),
+    deleteCode: (codeId) => request(`/api/codes/${codeId}`, { method: 'DELETE' }),
 };

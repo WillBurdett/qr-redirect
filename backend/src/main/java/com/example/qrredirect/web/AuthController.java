@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private static final String SESSION_USER_ID = "userId";
+    public static final String SESSION_USER_ID = "userId";
 
     private final UserService users;
 

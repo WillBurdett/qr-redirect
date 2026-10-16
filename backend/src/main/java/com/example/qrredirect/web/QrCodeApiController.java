@@ -8,15 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.qrredirect.model.QrCode;
@@ -67,6 +59,12 @@ public class QrCodeApiController {
         return toResponse(service.update(id, request.targetUrl(), request.active()));
     }
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
+    }
+
     /**
      * The printable QR image. format=png|svg, size (px, PNG only) 64-4096, ec=L|M|Q|H.
      * Use SVG for print. Use Q or H if you plan to overlay a logo.
@@ -75,9 +73,11 @@ public class QrCodeApiController {
     public ResponseEntity<?> image(@PathVariable Long id,
                                    @RequestParam(defaultValue = "png") String format,
                                    @RequestParam(defaultValue = "512") int size,
-                                   @RequestParam(defaultValue = "M") String ec) {
+                                   @RequestParam(defaultValue = "M") String ec,
+                                   @RequestParam(defaultValue = "false") boolean label) {
         QrCode qr = service.get(id);
         String content = images.shortUrl(qr.getShortCode());
+        String labelText = label ? String.valueOf(qr.getId()) : null;
         ErrorCorrectionLevel level = parseLevel(ec);
 
         return switch (format.toLowerCase(Locale.ROOT)) {
@@ -88,12 +88,12 @@ public class QrCodeApiController {
                 yield ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_PNG)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortCode() + ".png\"")
-                        .body(images.png(content, size, level));
+                        .body(images.png(content, size, level, labelText));
             }
             case "svg" -> ResponseEntity.ok()
                     .contentType(SVG)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortCode() + ".svg\"")
-                    .body(images.svg(content, level).getBytes(StandardCharsets.UTF_8));
+                    .body(images.svg(content, level, labelText).getBytes(StandardCharsets.UTF_8));
             default -> throw bad("format must be png or svg");
         };
     }
