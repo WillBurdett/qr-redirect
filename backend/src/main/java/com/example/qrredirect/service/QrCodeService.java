@@ -1,11 +1,18 @@
 package com.example.qrredirect.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -70,11 +77,24 @@ public class QrCodeService {
                 .map(QrCode::getTargetUrl);
     }
 
-    /** All codes, newest first, or just one company's when companyId is given. */
-    public List<QrCode> list(Long companyId) {
-        return companyId == null
-                ? repo.findAllByOrderByCreatedAtDesc()
-                : repo.findByCompanyIdOrderByCreatedAtDesc(companyId);
+    private static final int MAX_PAGE_SIZE = 100;
+
+    /** Newest first. Any filter left null is ignored; filters combine with AND. */
+    public Page<QrCode> search(Long companyId, Long id, Boolean active, int page, int size) {
+        Specification<QrCode> spec = (root, query, cb) -> {
+            List<Predicate> filters = new ArrayList<>();
+            if (companyId != null) filters.add(cb.equal(root.get("company").get("id"), companyId));
+            if (id != null)        filters.add(cb.equal(root.get("id"), id));
+            if (active != null)    filters.add(cb.equal(root.get("active"), active));
+            return cb.and(filters.toArray(new Predicate[0]));
+        };
+
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                Math.clamp(size, 1, MAX_PAGE_SIZE),
+                Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));   // id breaks ties so pages are stable
+
+        return repo.findAll(spec, pageable);
     }
 
     public QrCode get(Long id) {
@@ -96,9 +116,8 @@ public class QrCodeService {
     }
 
     @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
-    public QrCode delete(Long id) {
+    public void delete(Long id) {
         QrCode qr = get(id);        // 404 if it doesn't exist
         repo.delete(qr);
-        return qr;                  // returned so the cache key can use its shortCode
     }
 }

@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,10 +43,16 @@ public class QrCodeApiController {
         return toResponse(service.create(request.companyId(), request.targetUrl()));
     }
 
-    /** All codes, newest first. Add ?companyId=1 to see one company's codes. */
     @GetMapping
-    public List<CodeResponse> list(@RequestParam(required = false) Long companyId) {
-        return service.list(companyId).stream().map(this::toResponse).toList();
+    public CodeDtos.PageResponse<CodeResponse> list(@RequestParam(required = false) Long companyId,
+                                                    @RequestParam(required = false) Long id,
+                                                    @RequestParam(required = false) Boolean active,
+                                                    @RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        Page<QrCode> result = service.search(companyId, id, active, page, size);
+        return new CodeDtos.PageResponse<>(
+                result.getContent().stream().map(this::toResponse).toList(),
+                result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
     }
 
     @GetMapping("/{id}")
