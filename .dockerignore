@@ -1,0 +1,11 @@
+**/node_modules
+**/target
+**/dist
+**/data
+.git
+.github
+.idea
+.vscode
+.env
+.env.*
+**/cookies.txt
