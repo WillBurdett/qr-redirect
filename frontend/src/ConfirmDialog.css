@@ -1,0 +1,24 @@
+.confirm form {
+    margin: 0;
+}
+
+.confirm label {
+    display: grid;
+    gap: 6px;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 16px;
+}
+
+.confirm input {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.confirm__actions .confirm__primary {
+    background: #1f6feb;
+    border-color: #1f6feb;
+    color: #fff;
+}

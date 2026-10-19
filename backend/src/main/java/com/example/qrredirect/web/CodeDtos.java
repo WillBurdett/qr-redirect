@@ -1,6 +1,7 @@
 package com.example.qrredirect.web;
 
 import java.time.Instant;
+import java.util.List;
 
 import com.example.qrredirect.model.QrCode;
 
@@ -34,4 +35,6 @@ public final class CodeDtos {
                     qr.getTargetUrl(), qr.isActive(), qr.getCreatedAt(), qr.getUpdatedAt());
         }
     }
+
+    public record PageResponse<T>(List<T> items, int page, int size, long totalItems, int totalPages) {}
 }
