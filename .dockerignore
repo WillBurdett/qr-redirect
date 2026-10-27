@@ -1,11 +1,7 @@
-**/node_modules
-**/target
-**/dist
-**/data
-.git
-.github
-.idea
-.vscode
+.git/
 .env
-.env.*
-**/cookies.txt
+**/node_modules
+frontend/dist
+backend/target
+backend/data
+**/target
