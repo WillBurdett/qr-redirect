@@ -1,0 +1,7 @@
+qr-redirect.cloud {
+    reverse_proxy app:8080
+}
+
+www.qr-redirect.cloud {
+    redir https://qr-redirect.cloud{uri} permanent
+}
