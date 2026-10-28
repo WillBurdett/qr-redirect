@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import './ConfirmDialog.css';
 
 export default function EditCodeDialog({ code, busy = false, error = '', onSave, onCancel }) {
     const ref = useRef(null);
-    const [url, setUrl] = useState(code.targetUrl);   // starts from the code being edited
+    const [url, setUrl] = useState(code.targetUrl);
 
     useEffect(() => {
         if (!ref.current.open) ref.current.showModal();
@@ -12,24 +11,24 @@ export default function EditCodeDialog({ code, busy = false, error = '', onSave,
     return (
         <dialog
             ref={ref}
-            className="confirm"
-            style={{ width: 'min(480px, 90vw)' }}
+            className="m-auto w-[min(30rem,90vw)] rounded-2xl bg-white p-6 text-slate-900 shadow-2xl backdrop:bg-slate-900/40"
             onCancel={(e) => { e.preventDefault(); if (!busy) onCancel(); }}   // Esc key
         >
             <form onSubmit={(e) => { e.preventDefault(); onSave(url); }}>
-                <h3>Edit QR code</h3>
-                <p style={{ marginBottom: 12 }}>{code.companyName} · {code.shortCode}</p>
+                <h3 className="text-lg font-semibold">Edit QR code</h3>
+                <p className="mt-1 text-sm text-slate-500">{code.companyName} · {code.shortCode}</p>
 
-                <label>
+                <label className="mt-5 grid gap-1.5 text-sm font-medium text-slate-700">
                     Destination URL
-                    <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} required />
+                    <input type="url" className="input w-full font-normal" value={url}
+                        onChange={(e) => setUrl(e.target.value)} required />
                 </label>
 
-                {error && <p style={{ color: '#d92d20', marginBottom: 12 }}>{error}</p>}
+                {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
-                <div className="confirm__actions">
-                    <button type="button" onClick={onCancel} disabled={busy}>Cancel</button>
-                    <button className="confirm__primary" disabled={busy || url === code.targetUrl}>
+                <div className="mt-6 flex justify-end gap-2">
+                    <button type="button" className="btn" onClick={onCancel} disabled={busy}>Cancel</button>
+                    <button className="btn btn-primary" disabled={busy || url === code.targetUrl}>
                         {busy ? 'Saving…' : 'Save'}
                     </button>
                 </div>
