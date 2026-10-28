@@ -99,14 +99,31 @@ public class QrImageService {
         boolean hasLabel = label != null && !label.isBlank();
         int labelH = hasLabel ? Math.max(3, w / 8) : 0;
         int totalH = h + labelH;
+        int outW = 1024;
+        int outH = Math.round(outW * (float) totalH / w);
 
         StringBuilder sb = new StringBuilder(w * h);
-        sb.append("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ")
-                .append(w).append(' ').append(totalH)
+        sb.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"").append(outW)
+                .append("\" height=\"").append(outH)
+                .append("\" viewBox=\"0 0 ").append(w).append(' ').append(totalH)
                 .append("\" shape-rendering=\"crispEdges\" role=\"img\" aria-label=\"QR code\">");
         sb.append("<rect width=\"").append(w).append("\" height=\"").append(totalH).append("\" fill=\"#ffffff\"/>");
+
         sb.append("<path fill=\"#000000\" d=\"");
-        // ... the existing run-length loop, unchanged ...
+        for (int y = 0; y < h; y++) {
+            int x = 0;
+            while (x < w) {
+                if (m.get(x, y)) {
+                    int start = x;
+                    while (x < w && m.get(x, y)) x++;
+                    int len = x - start;
+                    sb.append('M').append(start).append(' ').append(y)
+                            .append('h').append(len).append("v1h-").append(len).append('z');
+                } else {
+                    x++;
+                }
+            }
+        }
         sb.append("\"/>");
 
         if (hasLabel) {

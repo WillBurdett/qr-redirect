@@ -13,7 +13,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U qr -d qrdb"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 20
 
 volumes:
   pgdata:

@@ -1,8 +1,12 @@
 package com.example.qrredirect.web;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -103,6 +107,38 @@ public class QrCodeApiController {
                     .body(images.svg(content, level, labelText).getBytes(StandardCharsets.UTF_8));
             default -> throw bad("format must be png or svg");
         };
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable Long id,
+                                           @RequestParam(defaultValue = "2048") int size,
+                                           @RequestParam(defaultValue = "Q") String ec) throws IOException {
+        if (size < 64 || size > 4096) {
+            throw bad("size must be between 64 and 4096");
+        }
+        QrCode qr = service.get(id);
+        String code = qr.getShortCode();
+        String content = images.shortUrl(code);
+        String labelText = String.valueOf(qr.getId());
+        ErrorCorrectionLevel level = parseLevel(ec);
+
+        byte[] png = images.png(content, size, level, labelText);
+        byte[] svg = images.svg(content, level, labelText).getBytes(StandardCharsets.UTF_8);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(out)) {
+            zip.putNextEntry(new ZipEntry(code + ".png"));
+            zip.write(png);
+            zip.closeEntry();
+            zip.putNextEntry(new ZipEntry(code + ".svg"));
+            zip.write(svg);
+            zip.closeEntry();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qr-" + code + ".zip\"")
+                .body(out.toByteArray());
     }
 
     private CodeResponse toResponse(QrCode qr) {
