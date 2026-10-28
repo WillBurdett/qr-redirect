@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import './css/ConfirmDialog.css';
 
 export default function ConfirmDialog({
     open, title, message, confirmLabel = 'Delete', busy = false, onConfirm, onCancel,
@@ -15,14 +14,14 @@ export default function ConfirmDialog({
     return (
         <dialog
             ref={ref}
-            className="confirm"
+            className="m-auto w-[min(26rem,90vw)] rounded-2xl bg-white p-6 text-slate-900 shadow-2xl backdrop:bg-slate-900/40"
             onCancel={(e) => { e.preventDefault(); if (!busy) onCancel(); }}   // Esc key
         >
-            <h3>{title}</h3>
-            <p>{message}</p>
-            <div className="confirm__actions">
-                <button type="button" onClick={onCancel} disabled={busy}>Cancel</button>
-                <button type="button" className="confirm__danger" onClick={onConfirm} disabled={busy}>
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <p className="mt-2 text-sm text-slate-600">{message}</p>
+            <div className="mt-6 flex justify-end gap-2">
+                <button type="button" className="btn" onClick={onCancel} disabled={busy}>Cancel</button>
+                <button type="button" className="btn btn-danger-solid" onClick={onConfirm} disabled={busy}>
                     {busy ? 'Deleting…' : confirmLabel}
                 </button>
             </div>

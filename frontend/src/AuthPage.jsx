@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext';
 
 export default function AuthPage() {
     const { login } = useAuth();
-    const [form, setForm] = useState({ name: '', email: '', password: '' });
+    const [form, setForm] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
 
@@ -14,7 +14,7 @@ export default function AuthPage() {
         setError('');
         setBusy(true);
         try {
-            login(form.email, form.password);
+            await login(form.email, form.password);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -23,22 +23,24 @@ export default function AuthPage() {
     }
 
     return (
-        <form onSubmit={submit} style={{ maxWidth: 320, margin: '4rem auto', display: 'grid', gap: 12 }}>
-            <h1>{'Log in'}</h1>
+        <div className="flex min-h-screen items-center justify-center px-4">
+            <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-8">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight">Log in</h1>
+                    <p className="mt-1 text-sm text-slate-500">QR-Redirect admin</p>
+                </div>
 
-            <input name="email" type="email" placeholder="Email" value={form.email} onChange={update} required />
-            <input
-                name="password"
-                type="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={update}
-                required
-            />
+                <input name="email" type="email" placeholder="Email" autoComplete="username"
+                    className="input w-full" value={form.email} onChange={update} required />
+                <input name="password" type="password" placeholder="Password" autoComplete="current-password"
+                    className="input w-full" value={form.password} onChange={update} required />
 
-            {error && <p style={{ color: 'crimson', margin: 0 }}>{error}</p>}
+                {error && <p className="text-sm text-red-600">{error}</p>}
 
-            <button disabled={busy}>{'Log in'}</button>
-        </form>
+                <button className="btn btn-primary w-full" disabled={busy}>
+                    {busy ? 'Logging in…' : 'Log in'}
+                </button>
+            </form>
+        </div>
     );
 }
