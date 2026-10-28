@@ -148,6 +148,25 @@ export default function Dashboard() {
         }
     }
 
+    async function downloadQr(qr, format) {
+        const params = new URLSearchParams({ format, ec: "Q" });
+        if (format === "png") params.set("size", "2048");
+
+        const res = await fetch(`/api/qr-codes/${qr.id}/image?${params}`, {
+            credentials: "include",
+        });
+        if (!res.ok) throw new Error(`Download failed (${res.status})`);
+
+        const url = URL.createObjectURL(await res.blob());
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${qr.shortCode}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+
     async function confirmDelete() {
         const target = pendingDelete;
         setError('');
@@ -229,6 +248,8 @@ export default function Dashboard() {
                             >
                                 Edit
                             </button>
+                            <button onClick={() => downloadQr(qr, "svg")}>Download SVG</button>
+                            <button onClick={() => downloadQr(qr, "png")}>Download PNG</button>
                             <Toggle
                                 checked={qr.active}
                                 onChange={() => toggleActive(qr)}
