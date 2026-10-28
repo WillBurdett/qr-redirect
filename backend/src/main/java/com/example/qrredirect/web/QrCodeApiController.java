@@ -79,8 +79,8 @@ public class QrCodeApiController {
     @GetMapping("/{id}/image")
     public ResponseEntity<?> image(@PathVariable Long id,
                                    @RequestParam(defaultValue = "png") String format,
-                                   @RequestParam(defaultValue = "512") int size,
-                                   @RequestParam(defaultValue = "M") String ec,
+                                   @RequestParam(defaultValue = "2048") int size,
+                                   @RequestParam(defaultValue = "Q") String ec,
                                    @RequestParam(defaultValue = "false") boolean label) {
         QrCode qr = service.get(id);
         String content = images.shortUrl(qr.getShortCode());
