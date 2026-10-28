@@ -19,8 +19,6 @@ export default function Dashboard() {
     const [companyId, setCompanyId] = useState('');
     const [targetUrl, setTargetUrl] = useState('');
     const [newCompany, setNewCompany] = useState('');
-    const [updateId, setUpdateId] = useState('');
-    const [updateUrl, setUpdateUrl] = useState('');
     const [togglingId, setTogglingId] = useState(null);
     const [pendingDelete, setPendingDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
@@ -32,6 +30,20 @@ export default function Dashboard() {
 
     const reload = () => setReloadKey((k) => k + 1);
     const filtersActive = filters.companyId !== '' || filters.codeId !== '' || filters.status !== '';
+
+    const btn = {
+        font: 'inherit',
+        fontSize: 14,
+        height: 34,
+        padding: '0 14px',
+        borderRadius: 8,
+        border: '1px solid #cfd4dc',
+        background: '#fff',
+        color: '#1f2937',
+        whiteSpace: 'nowrap',      // stops "Download" wrapping onto two lines
+        cursor: 'pointer',
+    };
+    const btnDanger = { ...btn, color: '#d92d20', borderColor: '#e5b4ae' };
 
     // Companies, once
     useEffect(() => {
@@ -103,19 +115,6 @@ export default function Dashboard() {
         }
     }
 
-    async function updateCode(e) {
-        e.preventDefault();
-        setError('');
-        try {
-            await api.updateTarget(Number(updateId), updateUrl);
-            setUpdateId('');
-            setUpdateUrl('');
-            reload();
-        } catch (err) {
-            setError(err.message);
-        }
-    }
-
     function openEdit(qr) {
         setEditError('');
         setEditing(qr);
@@ -145,6 +144,23 @@ export default function Dashboard() {
             setError(err.message);
         } finally {
             setTogglingId(null);
+        }
+    }
+
+    async function downloadQr(code) {
+        setError('');
+        try {
+            const blob = await api.downloadCodeZip(code.id);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qr-${code.shortCode}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            setError(err.message);
         }
     }
 
@@ -223,27 +239,22 @@ export default function Dashboard() {
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <button
-                                onClick={() => openEdit(qr)}
-                                style={{ background: 'none', border: '1px solid #888', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}
-                            >
-                                Edit
-                            </button>
-                            <Toggle
-                                checked={qr.active}
-                                onChange={() => toggleActive(qr)}
-                                disabled={togglingId === qr.id}
-                                label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortCode}`}
-                            />
-                            <span style={{ color: qr.active ? '#1f9d4a' : '#d92d20', fontWeight: 600 }}>
-                                {qr.active ? 'Active' : 'Inactive'}
-                            </span>
-                            <button
-                                onClick={() => setPendingDelete(qr)}
-                                style={{ color: '#d92d20', background: 'none', border: '1px solid #d92d20', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}
-                            >
-                                Delete
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <button style={btn} onClick={() => openEdit(qr)}>Edit</button>
+                                <button style={btn} title="Downloads a zip with PNG and SVG" onClick={() => downloadQr(qr)}>
+                                    Download
+                                </button>
+                                <Toggle
+                                    checked={qr.active}
+                                    onChange={() => toggleActive(qr)}
+                                    disabled={togglingId === qr.id}
+                                    label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortCode}`}
+                                />
+                                <span style={{ fontSize: 14, fontWeight: 600, minWidth: 64, textAlign: 'center', color: qr.active ? '#1f9d4a' : '#d92d20' }}>
+                                    {qr.active ? 'Active' : 'Inactive'}
+                                </span>
+                                <button style={btnDanger} onClick={() => setPendingDelete(qr)}>Delete</button>
+                            </div>
                         </div>
                     </div>
                 ))}

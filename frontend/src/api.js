@@ -36,5 +36,10 @@ export const api = {
         request(`/api/codes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
     codeStatus: (id, active) =>
         request(`/api/codes/${id}`, { method: 'PUT', body: JSON.stringify({ active }) }),
+    downloadCodeZip: async (codeId) => {
+        const res = await fetch(`/api/codes/${codeId}/download`, { credentials: 'include' });
+        if (!res.ok) throw new Error(`Download failed (${res.status})`);
+        return res.blob();
+    },
     deleteCode: (codeId) => request(`/api/codes/${codeId}`, { method: 'DELETE' }),
 };
