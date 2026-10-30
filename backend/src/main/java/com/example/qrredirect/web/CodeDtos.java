@@ -26,13 +26,14 @@ public final class CodeDtos {
             String companyName,
             String targetUrl,
             boolean active,
+            Long scanCount,
             Instant createdAt,
             Instant updatedAt) {
 
         public static CodeResponse of(QrCode qr, String shortUrl) {
             return new CodeResponse(qr.getId(), qr.getShortCode(), shortUrl,
                     qr.getCompany().getId(), qr.getCompany().getName(),
-                    qr.getTargetUrl(), qr.isActive(), qr.getCreatedAt(), qr.getUpdatedAt());
+                    qr.getTargetUrl(), qr.isActive(), qr.getScanCount(), qr.getCreatedAt(), qr.getUpdatedAt());
         }
     }
 

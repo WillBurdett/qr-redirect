@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import ch.qos.logback.classic.Logger;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -107,7 +108,11 @@ public class QrCodeService {
     public QrCode update(Long id, String targetUrl, Boolean active) {
         QrCode qr = get(id);
         if (targetUrl != null) {
-            qr.setTargetUrl(policy.validate(targetUrl));
+            String url = policy.validate(targetUrl);
+            if (!url.equals(qr.getTargetUrl())) {
+                qr.setTargetUrl(url);
+                qr.setScanCount(0);
+            }
         }
         if (active != null) {
             qr.setActive(active);
@@ -119,5 +124,15 @@ public class QrCodeService {
     public void delete(Long id) {
         QrCode qr = get(id);        // 404 if it doesn't exist
         repo.delete(qr);
+    }
+
+    Logger log;
+
+    public void recordScan(String shortCode) {
+        try {
+            repo.incrementScans(shortCode);
+        } catch (RuntimeException e) {
+            log.warn("Could not record scan for {}", shortCode, e);   // never break a redirect over a counter
+        }
     }
 }

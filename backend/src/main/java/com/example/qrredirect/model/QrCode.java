@@ -14,7 +14,9 @@ import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.DynamicUpdate;
 
+@DynamicUpdate
 @Entity
 @Table(name = "qr_codes",
         indexes = @Index(name = "idx_qr_codes_company", columnList = "company_id"))
@@ -39,6 +41,9 @@ public class QrCode {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name = "scan_count", nullable = false)
+    private long scanCount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -71,6 +76,9 @@ public class QrCode {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public long getScanCount() { return scanCount; }
+    public void setScanCount(long scanCount) { this.scanCount = scanCount; }
 
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

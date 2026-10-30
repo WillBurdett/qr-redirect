@@ -253,16 +253,32 @@ export default function Dashboard() {
                                     onClick={() => downloadQr(qr)}>
                                     Download
                                 </button>
-                                <Toggle
-                                    checked={qr.active}
-                                    onChange={() => toggleActive(qr)}
-                                    disabled={togglingId === qr.id}
-                                    label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortCode}`}
-                                />
-                                <span className={`w-[4.5rem] text-center text-sm font-semibold ${qr.active ? 'text-emerald-600' : 'text-red-600'}`}>
-                                    {qr.active ? 'Active' : 'Inactive'}
-                                </span>
-                                <button className="btn btn-danger" onClick={() => setPendingDelete(qr)}>Delete</button>
+                            </div>
+
+                            <p className="mt-2 text-sm text-slate-500">
+                                <span className="font-semibold text-slate-900">
+                                    {qr.scanCount}
+                                </span>{' '}
+                                {qr.scanCount === 1 ? 'hit' : 'hits'}
+                            </p>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <button className="btn" onClick={() => openEdit(qr)}>Edit</button>
+                                    <button className="btn" title="Downloads a zip with PNG and SVG" onClick={() => downloadQr(qr)}>
+                                        Download
+                                    </button>
+                                    <Toggle
+                                        checked={qr.active}
+                                        onChange={() => toggleActive(qr)}
+                                        disabled={togglingId === qr.id}
+                                        label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortCode}`}
+                                    />
+                                    <span className={`w-[4.5rem] text-center text-sm font-semibold ${qr.active ? 'text-emerald-600' : 'text-red-600'}`}>
+                                        {qr.active ? 'Active' : 'Inactive'}
+                                    </span>
+                                    <button className="btn btn-danger" onClick={() => setPendingDelete(qr)}>Delete</button>
+                                </div>
                             </div>
                         </article>
                     ))}

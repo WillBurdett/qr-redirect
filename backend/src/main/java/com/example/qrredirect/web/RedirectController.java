@@ -4,12 +4,10 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.qrredirect.service.QrCodeService;
@@ -43,20 +41,36 @@ public class RedirectController {
      * no-store keeps intermediaries from caching it too.
      */
     @GetMapping("/q/{code}")
-    public ResponseEntity<String> redirect(@PathVariable String code) {
+    public ResponseEntity<String> redirect(
+            @PathVariable String code,
+            @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
+
         // Cheap format check so junk never reaches the cache or the database
-        if (CODE_FORMAT.matcher(code).matches()) {
-            Optional<String> target = service.resolveTarget(code);
-            if (target.isPresent()) {
-                return ResponseEntity.status(HttpStatus.FOUND)
-                        .location(URI.create(target.get()))
-                        .cacheControl(CacheControl.noStore())
-                        .build();
-            }
+        Optional<String> target = CODE_FORMAT.matcher(code).matches()
+                ? service.resolveTarget(code)
+                : Optional.empty();
+
+        if (target.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .contentType(MediaType.TEXT_HTML)
+                    .cacheControl(CacheControl.noStore())
+                    .body(NOT_FOUND_PAGE);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .contentType(MediaType.TEXT_HTML)
+
+        if (!looksLikeBot(userAgent)) {
+            service.recordScan(code);
+        }
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(target.get()))
                 .cacheControl(CacheControl.noStore())
-                .body(NOT_FOUND_PAGE);
+                .build();
+    }
+
+    private static boolean looksLikeBot(String ua) {
+        if (ua == null) return false;
+        String s = ua.toLowerCase();
+        return s.contains("bot") || s.contains("crawler") || s.contains("spider")
+                || s.contains("preview") || s.contains("whatsapp");
     }
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -40,7 +41,6 @@ public class QrCodeApiController {
         this.service = service;
         this.images = images;
     }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CodeResponse create(@Valid @RequestBody CreateCodeRequest request) {
