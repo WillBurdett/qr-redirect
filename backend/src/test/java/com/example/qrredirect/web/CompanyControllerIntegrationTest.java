@@ -13,6 +13,7 @@ import com.example.qrredirect.model.Company;
 import com.example.qrredirect.model.PlanType;
 import com.example.qrredirect.repo.CompanyRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -53,106 +54,110 @@ class CompanyControllerIntegrationTest {
         session = (MockHttpSession) result.getRequest().getSession(false);
     }
 
-    @Test
-    void rejectsLoginForUnknownEmail() throws Exception {
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                            { "email": "nobody@qr.com", "password": "password123" }
-                            """))
-                .andExpect(status().isUnauthorized());
-    }
+    @Nested
+    class create {
 
-    @Test
-    void rejectsLoginWithWrongPassword() throws Exception {
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                            { "email": "admin@qr.com", "password": "wrong-password" }
-                            """))
-                .andExpect(status().isUnauthorized())
-                .andExpect(result -> assertThat(result.getRequest().getSession(false)).isNull());
-    }
+        @Test
+        void rejectsLoginForUnknownEmail() throws Exception {
+            mockMvc.perform(post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "email": "nobody@qr.com", "password": "password123" }
+                                    """))
+                    .andExpect(status().isUnauthorized());
+        }
 
-    @Test
-    void createsCompanyOnPilotPlanWithThirtyDayExpiry() throws Exception {
-        mockMvc.perform(post("/api/companies")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                { "name": "Miles & Barr", "planType": "PILOT" }
-                                """))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Miles & Barr"))
-                .andExpect(jsonPath("$.planType").value("PILOT"));
+        @Test
+        void rejectsLoginWithWrongPassword() throws Exception {
+            mockMvc.perform(post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "email": "admin@qr.com", "password": "wrong-password" }
+                                    """))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(result -> assertThat(result.getRequest().getSession(false)).isNull());
+        }
 
-        Company saved = companies.findAll().stream()
-                .filter(c -> c.getName().equals("Miles & Barr"))
-                .findFirst().orElseThrow();
+        @Test
+        void createsCompanyOnPilotPlanWithThirtyDayExpiry() throws Exception {
+            mockMvc.perform(post("/api/companies")
+                            .session(session)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "name": "Miles & Barr", "planType": "PILOT" }
+                                    """))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.name").value("Miles & Barr"))
+                    .andExpect(jsonPath("$.planType").value("PILOT"));
 
-        assertThat(saved.getPlanType()).isEqualTo(PlanType.PILOT);
-        assertThat(saved.getPlanStartedAt()).isNotNull();
-        assertThat(Duration.between(saved.getPlanStartedAt(), saved.getPlanExpiresAt()))
-                .isEqualTo(Duration.ofDays(30));
-    }
+            Company saved = companies.findAll().stream()
+                    .filter(c -> c.getName().equals("Miles & Barr"))
+                    .findFirst().orElseThrow();
 
-    @Test
-    void createsCompanyOnNonPilotPlanWithoutThirtyDayExpiry() throws Exception {
-        mockMvc.perform(post("/api/companies")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                { "name": "Miles & Barr", "planType": "AGENCY" }
-                                """))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Miles & Barr"))
-                .andExpect(jsonPath("$.planType").value("AGENCY"));
+            assertThat(saved.getPlanType()).isEqualTo(PlanType.PILOT);
+            assertThat(saved.getPlanStartedAt()).isNotNull();
+            assertThat(Duration.between(saved.getPlanStartedAt(), saved.getPlanExpiresAt()))
+                    .isEqualTo(Duration.ofDays(30));
+        }
 
-        Company saved = companies.findAll().stream()
-                .filter(c -> c.getName().equals("Miles & Barr"))
-                .findFirst().orElseThrow();
+        @Test
+        void createsCompanyOnNonPilotPlanWithoutThirtyDayExpiry() throws Exception {
+            mockMvc.perform(post("/api/companies")
+                            .session(session)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "name": "Miles & Barr", "planType": "AGENCY" }
+                                    """))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.name").value("Miles & Barr"))
+                    .andExpect(jsonPath("$.planType").value("AGENCY"));
 
-        assertThat(saved.getPlanType()).isEqualTo(PlanType.AGENCY);
-        assertThat(saved.getPlanStartedAt()).isNotNull();
-        assertThat(saved.getPlanExpiresAt()).isNull();
-    }
+            Company saved = companies.findAll().stream()
+                    .filter(c -> c.getName().equals("Miles & Barr"))
+                    .findFirst().orElseThrow();
 
-    @Test
-    void createsCompanyWithEmptyName() throws Exception {
-        mockMvc.perform(post("/api/companies")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                { "name": "", "planType": "AGENCY" }
-                                """))
-                .andExpect(status().isBadRequest());
-    }
+            assertThat(saved.getPlanType()).isEqualTo(PlanType.AGENCY);
+            assertThat(saved.getPlanStartedAt()).isNotNull();
+            assertThat(saved.getPlanExpiresAt()).isNull();
+        }
 
-    @Test
-    void rejectsDuplicateNameIgnoringCase() throws Exception {
-        Company existing = new Company();
-        existing.setName("Miles & Barr");
-        existing.setPlanType(PlanType.PILOT);
-        existing.setPlanStartedAt(Instant.now());
-        companies.saveAndFlush(existing);
+        @Test
+        void rejectsCompanyWithEmptyName() throws Exception {
+            mockMvc.perform(post("/api/companies")
+                            .session(session)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "name": "", "planType": "AGENCY" }
+                                    """))
+                    .andExpect(status().isBadRequest());
+        }
 
-        mockMvc.perform(post("/api/companies")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                            { "name": "miles & barr", "planType": "PILOT" }
-                            """))
-                .andExpect(status().isConflict());
-    }
+        @Test
+        void rejectsDuplicateNameIgnoringCase() throws Exception {
+            Company existing = new Company();
+            existing.setName("Miles & Barr");
+            existing.setPlanType(PlanType.PILOT);
+            existing.setPlanStartedAt(Instant.now());
+            companies.saveAndFlush(existing);
 
-    @Test
-    void createsCompanyWithUnknownPlan() throws Exception {
-        mockMvc.perform(post("/api/companies")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                { "name": "Miles & Barr", "planType": "PLATINUM" }
-                                """))
-                .andExpect(status().isBadRequest());
+            mockMvc.perform(post("/api/companies")
+                            .session(session)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "name": "miles & barr", "planType": "PILOT" }
+                                    """))
+                    .andExpect(status().isConflict());
+        }
+
+        @Test
+        void rejectsCompanyWithUnknownPlan() throws Exception {
+            mockMvc.perform(post("/api/companies")
+                            .session(session)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    { "name": "Miles & Barr", "planType": "PLATINUM" }
+                                    """))
+                    .andExpect(status().isBadRequest());
+        }
     }
 }
