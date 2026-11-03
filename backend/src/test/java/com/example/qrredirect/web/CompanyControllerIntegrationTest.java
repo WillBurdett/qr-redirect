@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Duration;
+import java.time.Instant;
 
 
 import com.example.qrredirect.model.Company;
@@ -53,6 +54,27 @@ class CompanyControllerIntegrationTest {
     }
 
     @Test
+    void rejectsLoginForUnknownEmail() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            { "email": "nobody@qr.com", "password": "password123" }
+                            """))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void rejectsLoginWithWrongPassword() throws Exception {
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            { "email": "admin@qr.com", "password": "wrong-password" }
+                            """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertThat(result.getRequest().getSession(false)).isNull());
+    }
+
+    @Test
     void createsCompanyOnPilotPlanWithThirtyDayExpiry() throws Exception {
         mockMvc.perform(post("/api/companies")
                         .session(session)
@@ -93,5 +115,44 @@ class CompanyControllerIntegrationTest {
         assertThat(saved.getPlanType()).isEqualTo(PlanType.AGENCY);
         assertThat(saved.getPlanStartedAt()).isNotNull();
         assertThat(saved.getPlanExpiresAt()).isNull();
+    }
+
+    @Test
+    void createsCompanyWithEmptyName() throws Exception {
+        mockMvc.perform(post("/api/companies")
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "name": "", "planType": "AGENCY" }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectsDuplicateNameIgnoringCase() throws Exception {
+        Company existing = new Company();
+        existing.setName("Miles & Barr");
+        existing.setPlanType(PlanType.PILOT);
+        existing.setPlanStartedAt(Instant.now());
+        companies.saveAndFlush(existing);
+
+        mockMvc.perform(post("/api/companies")
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            { "name": "miles & barr", "planType": "PILOT" }
+                            """))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void createsCompanyWithUnknownPlan() throws Exception {
+        mockMvc.perform(post("/api/companies")
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "name": "Miles & Barr", "planType": "PLATINUM" }
+                                """))
+                .andExpect(status().isBadRequest());
     }
 }
