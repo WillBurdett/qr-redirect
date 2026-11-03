@@ -11,40 +11,8 @@ import java.math.BigDecimal;
 @Table(name = "plans")
 public class Plan {
 
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public BigDecimal getMonthlyPricePounds() {
-        return monthlyPricePounds;
-    }
-
-    public void setMonthlyPricePounds(BigDecimal monthlyPricePounds) {
-        this.monthlyPricePounds = monthlyPricePounds;
-    }
-
-    public Integer getMaxActiveCodes() {
-        return maxActiveCodes;
-    }
-
-    public void setMaxActiveCodes(Integer maxActiveCodes) {
-        this.maxActiveCodes = maxActiveCodes;
-    }
-
-    public Integer getDurationDays() {
-        return durationDays;
-    }
-
-    public void setDurationDays(Integer durationDays) {
-        this.durationDays = durationDays;
-    }
-
     @Id
-    private String code;   // 'PILOT', 'STARTER', ...
+    private String code;
 
     @Column(name = "monthly_price_pounds")
     private BigDecimal monthlyPricePounds;
@@ -55,5 +23,16 @@ public class Plan {
     @Column(name = "duration_days")
     private Integer durationDays;
 
-    // getters
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Integer getDurationDays() {
+        return durationDays;
+    }
 }
