@@ -48,10 +48,11 @@ class QrRedirectFlowTest {
 
     /** Creates a company with a unique name (the database is shared by every test in this class). */
     private long createCompany(String namePrefix) throws Exception {
+        String name = namePrefix + "-" + UUID.randomUUID();
         String body = mvc.perform(post("/api/companies")
                         .header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"" + namePrefix + "-" + UUID.randomUUID() + "\"}"))
+                        .content("{\"name\":\"" + name + "\",\"planType\":\"PILOT\"}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return json.readTree(body).get("id").asLong();
@@ -149,16 +150,16 @@ class QrRedirectFlowTest {
         String name = "Rules-" + UUID.randomUUID();
         String body = mvc.perform(post("/api/companies").header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"  " + name + "  \"}"))
+                        .content("{\"name\":\"  " + name + "  \",\"planType\":\"PILOT\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value(name))   // trimmed
+                .andExpect(jsonPath("$.name").value(name))
                 .andReturn().getResponse().getContentAsString();
         long id = json.readTree(body).get("id").asLong();
 
         // Same name again, in a different case: conflict
         mvc.perform(post("/api/companies").header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"" + name.toUpperCase() + "\"}"))
+                        .content("{\"name\":\"" + name.toUpperCase() + "\",\"planType\":\"PILOT\"}"))
                 .andExpect(status().isConflict());
 
         // Blank or missing name: bad request
