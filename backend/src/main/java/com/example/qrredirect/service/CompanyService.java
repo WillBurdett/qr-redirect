@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.example.qrredirect.model.Plan;
 import com.example.qrredirect.model.PlanType;
+import com.example.qrredirect.model.Status;
 import com.example.qrredirect.repo.PlanRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,9 @@ public class CompanyService {
         company.setPlanStartedAt(now);
         if (currentPlan.getDurationDays() != null) {
             company.setPlanExpiresAt(now.plus(currentPlan.getDurationDays(), ChronoUnit.DAYS));
+            company.setStatus(Status.TRIAL);
+        } else {
+            company.setStatus(Status.ACTIVE);
         }
 
         try {

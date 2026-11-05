@@ -29,6 +29,10 @@ public class Company {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status = Status.TRIAL;
+
     @PrePersist
     void onCreate() {
         createdAt = Instant.now();
@@ -64,6 +68,13 @@ public class Company {
         this.planExpiresAt = planExpiresAt;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public Instant getCreatedAt() { return createdAt; }
 }

@@ -21,8 +21,8 @@ export const api = {
         request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     logout: () => request('/auth/logout', { method: 'POST' }),
     listCompanies: () => request('/api/companies'),
-    createCompany: (name) =>
-        request('/api/companies', { method: 'POST', body: JSON.stringify({ name }) }),
+    createCompany: (name, planType) =>
+        request('/api/companies', { method: 'POST', body: JSON.stringify({ name, planType }) }),
     listCodes: ({ companyId, id, active, page = 0, size = 10 } = {}) => {
         const params = new URLSearchParams({ page, size });
         if (companyId) params.set('companyId', companyId);

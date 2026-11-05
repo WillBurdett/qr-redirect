@@ -19,6 +19,7 @@ export default function Dashboard() {
     const [companyId, setCompanyId] = useState('');
     const [targetUrl, setTargetUrl] = useState('');
     const [newCompany, setNewCompany] = useState('');
+    const [newPlanType, setNewPlanType] = useState('');
     const [togglingId, setTogglingId] = useState(null);
     const [pendingDelete, setPendingDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
@@ -28,6 +29,8 @@ export default function Dashboard() {
     const [editError, setEditError] = useState('');
     const [saving, setSaving] = useState(false);
 
+    const PLAN_TYPES = ["PILOT", "STARTER", "BRANCH", "AGENCY", "CUSTOM"];
+    
     const reload = () => setReloadKey((k) => k + 1);
     const filtersActive = filters.companyId !== '' || filters.codeId !== '' || filters.status !== '';
 
@@ -77,10 +80,11 @@ export default function Dashboard() {
         e.preventDefault();
         setError('');
         try {
-            const company = await api.createCompany(newCompany);
+            const company = await api.createCompany(newCompany, newPlanType);
             setCompanies([...companies, company]);
             setCompanyId(String(company.id));
             setNewCompany('');
+            setNewPlanType('');
         } catch (err) {
             setError(err.message);
         }
@@ -179,6 +183,17 @@ export default function Dashboard() {
                         <input className="input min-w-0 flex-1" value={newCompany}
                             onChange={(e) => setNewCompany(e.target.value)}
                             placeholder="New company name" required maxLength={128} />
+                        <select
+                            className="input min-w-0 flex-1"
+                            value={newPlanType}
+                            onChange={(e) => setNewPlanType(e.target.value)}
+                            required
+                        >
+                            <option value="" disabled>Plan Type</option>
+                            {PLAN_TYPES.map((type) => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
                         <button className="btn btn-primary">Add</button>
                     </form>
                 </section>
