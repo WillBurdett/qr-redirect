@@ -1,7 +1,12 @@
 package com.example.qrredirect.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.example.qrredirect.model.Plan;
+import com.example.qrredirect.model.PlanType;
+import com.example.qrredirect.repo.PlanRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,12 +21,14 @@ public class CompanyService {
     private static final int MAX_NAME_LENGTH = 128;
 
     private final CompanyRepository repo;
+    private final PlanRepository planRepo;
 
-    public CompanyService(CompanyRepository repo) {
+    public CompanyService(CompanyRepository repo, PlanRepository planRepo) {
         this.repo = repo;
+        this.planRepo = planRepo;
     }
 
-    public Company create(String rawName) {
+    public Company create(String rawName, String planType) {
         String name = rawName == null ? "" : rawName.trim();
         if (name.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name is required");
@@ -33,8 +40,22 @@ public class CompanyService {
         if (repo.existsByNameIgnoreCase(name)) {
             throw duplicate();
         }
+
+        Plan currentPlan = planRepo.findByCode(planType)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Unknown plan: " + planType));
+
         Company company = new Company();
         company.setName(name);
+        company.setPlanType(PlanType.valueOf(planType));
+        company.setPlanStartedAt(Instant.now());
+
+        Instant now = Instant.now();
+        company.setPlanStartedAt(now);
+        if (currentPlan.getDurationDays() != null) {
+            company.setPlanExpiresAt(now.plus(currentPlan.getDurationDays(), ChronoUnit.DAYS));
+        }
+
         try {
             return repo.saveAndFlush(company);
         } catch (DataIntegrityViolationException e) {

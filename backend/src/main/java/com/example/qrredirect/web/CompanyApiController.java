@@ -31,7 +31,7 @@ public class CompanyApiController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CompanyResponse create(@Valid @RequestBody CreateCompanyRequest request) {
-        return CompanyResponse.of(service.create(request.name()));
+        return CompanyResponse.of(service.create(request.name(), request.planType()));
     }
 
     @GetMapping
