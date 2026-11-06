@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import ch.qos.logback.classic.Logger;
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.cache.annotation.CacheEvict;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -103,8 +103,6 @@ public class QrCodeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QR code not found"));
     }
 
-    /** Reassigns and/or (de)activates a code. Null arguments are left unchanged. */
-    @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
     public QrCode update(Long id, String targetUrl, Boolean active) {
         QrCode qr = get(id);
         if (targetUrl != null) {
@@ -120,7 +118,7 @@ public class QrCodeService {
         return repo.save(qr);
     }
 
-    @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
+
     public void delete(Long id) {
         QrCode qr = get(id);        // 404 if it doesn't exist
         repo.delete(qr);
