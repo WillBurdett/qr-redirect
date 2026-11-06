@@ -3,6 +3,7 @@ package com.example.qrredirect.service;
 import com.example.qrredirect.model.Company;
 import com.example.qrredirect.model.Plan;
 import com.example.qrredirect.model.PlanType;
+import com.example.qrredirect.model.Status;
 import com.example.qrredirect.repo.CompanyRepository;
 import com.example.qrredirect.repo.PlanRepository;
 import org.junit.jupiter.api.Nested;
@@ -45,6 +46,7 @@ class CompanyServiceTest {
             assertThat(result.getPlanType()).isEqualTo(PlanType.PILOT);
             assertThat(Duration.between(result.getPlanStartedAt(), result.getPlanExpiresAt()))
                     .isEqualTo(Duration.ofDays(30));
+            assertThat(result.getStatus()).isEqualTo(Status.TRIAL);
         }
 
         @Test
@@ -56,6 +58,7 @@ class CompanyServiceTest {
             assertThat(result.getPlanType()).isEqualTo(PlanType.BRANCH);
             assertThat(result.getPlanStartedAt()).isNotNull();
             assertThat(result.getPlanExpiresAt()).isNull();
+            assertThat(result.getStatus()).isEqualTo(Status.ACTIVE);
         }
 
         @Test
