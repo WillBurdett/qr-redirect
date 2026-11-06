@@ -9,18 +9,18 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /** Request/response shapes for the QR code API. */
-public final class CodeDtos {
+public final class QrCodeDtos {
 
-    private CodeDtos() {}
+    private QrCodeDtos() {}
 
-    public record CreateCodeRequest(@NotNull Long companyId, @NotBlank String targetUrl) {}
+    public record CreateQrCodeRequest(@NotNull Long companyId, @NotBlank String targetUrl) {}
 
     /** Both fields optional: send only what you want to change. */
     public record UpdateCodeRequest(String targetUrl, Boolean active) {}
 
-    public record CodeResponse(
+    public record QrCodeResponse(
             Long id,
-            String shortCode,
+            String shortQrCode,
             String shortUrl,
             Long companyId,
             String companyName,
@@ -30,8 +30,8 @@ public final class CodeDtos {
             Instant createdAt,
             Instant updatedAt) {
 
-        public static CodeResponse of(QrCode qr, String shortUrl) {
-            return new CodeResponse(qr.getId(), qr.getShortCode(), shortUrl,
+        public static QrCodeResponse of(QrCode qr, String shortUrl) {
+            return new QrCodeResponse(qr.getId(), qr.getShortCode(), shortUrl,
                     qr.getCompany().getId(), qr.getCompany().getName(),
                     qr.getTargetUrl(), qr.isActive(), qr.getScanCount(), qr.getCreatedAt(), qr.getUpdatedAt());
         }

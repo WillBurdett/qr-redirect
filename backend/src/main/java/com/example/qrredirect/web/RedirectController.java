@@ -16,7 +16,7 @@ import com.example.qrredirect.service.QrCodeService;
 @RestController
 public class RedirectController {
 
-    private static final Pattern CODE_FORMAT = Pattern.compile("[0-9A-Za-z]{4,16}");
+    private static final Pattern QR_CODE_FORMAT = Pattern.compile("[0-9A-Za-z]{4,16}");
 
     private static final String NOT_FOUND_PAGE = """
             <!doctype html>
@@ -46,7 +46,7 @@ public class RedirectController {
             @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
 
         // Cheap format check so junk never reaches the cache or the database
-        Optional<String> target = CODE_FORMAT.matcher(code).matches()
+        Optional<String> target = QR_CODE_FORMAT.matcher(code).matches()
                 ? service.resolveTarget(code)
                 : Optional.empty();
 

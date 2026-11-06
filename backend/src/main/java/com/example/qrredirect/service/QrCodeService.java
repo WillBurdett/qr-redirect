@@ -6,8 +6,7 @@ import java.util.Optional;
 
 import ch.qos.logback.classic.Logger;
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,11 +66,7 @@ public class QrCodeService {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not allocate a short code");
     }
 
-    /**
-     * The hot path: short code -> target URL. Only active codes resolve. Misses are not cached.
-     * (Spring unwraps the Optional, so "#result == null" means "empty".)
-     */
-    @Cacheable(cacheNames = "targets", key = "#shortCode", unless = "#result == null")
+
     public Optional<String> resolveTarget(String shortCode) {
         return repo.findByShortCode(shortCode)
                 .filter(QrCode::isActive)
@@ -103,8 +98,6 @@ public class QrCodeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "QR code not found"));
     }
 
-    /** Reassigns and/or (de)activates a code. Null arguments are left unchanged. */
-    @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
     public QrCode update(Long id, String targetUrl, Boolean active) {
         QrCode qr = get(id);
         if (targetUrl != null) {
@@ -120,7 +113,7 @@ public class QrCodeService {
         return repo.save(qr);
     }
 
-    @CacheEvict(cacheNames = "targets", key = "#result.shortCode")
+
     public void delete(Long id) {
         QrCode qr = get(id);        // 404 if it doesn't exist
         repo.delete(qr);
