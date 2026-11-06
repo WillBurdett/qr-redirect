@@ -1,6 +1,6 @@
 import Toggle from './Toggle';
 
-export default function CodeCard({ qr, toggling, onEdit, onDownload, onToggle, onDelete }) {
+export default function QrCodeCard({ qr, toggling, onEdit, onDownload, onToggle, onDelete }) {
     const dim = qr.active ? '' : 'opacity-50';
     return (
         <article className="card flex flex-col gap-5 sm:flex-row sm:items-center">

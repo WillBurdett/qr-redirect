@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function EditCodeDialog({ code, busy = false, error = '', onSave, onCancel }) {
+export default function EditQrCodeDialog({ code, busy = false, error = '', onSave, onCancel }) {
     const ref = useRef(null);
     const [url, setUrl] = useState(code.targetUrl);
 

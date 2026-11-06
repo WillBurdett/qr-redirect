@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
 import ConfirmDialog from './ConfirmDialog';
-import EditCodeDialog from './EditCodeDialog';
-import CodeCard from './CodeCard';
-import { useCodes } from './useCodes';
+import EditCodeDialog from './EditQrCodeDialog';
+import QrCodeCard from './QrCodeCard';
+import { useQrCodes } from './UseQrCodes';
 import AddCompanyForm from './AddCompanyForm';
-import AddCodeForm from './AddCodeForm';
+import AddQrCodeForm from './AddQrCodeForm';
 import QrFilters from './QrFilters';
 import Pagination from './Pagination';
 
@@ -15,7 +15,7 @@ export default function Dashboard() {
     const [companies, setCompanies] = useState([]);
     const [filters, setFilters] = useState(NO_FILTERS);
     const [page, setPage] = useState(0);
-    const { codes, pageInfo, loading, loadError, reload } = useCodes(filters, page, setPage);
+    const { codes, pageInfo, loading, loadError, reload } = useQrCodes(filters, page, setPage);
 
     const [companyId, setCompanyId] = useState('');
     const [togglingId, setTogglingId] = useState(null);
@@ -131,7 +131,7 @@ export default function Dashboard() {
 
             <div className="grid gap-6 md:grid-cols-2">
                 <AddCompanyForm onSubmit={addCompany} />
-                <AddCodeForm companies={companies} onSubmit={addCode} />
+                <AddQrCodeForm companies={companies} onSubmit={addCode} />
             </div>
 
             <section>
@@ -148,7 +148,7 @@ export default function Dashboard() {
                         <div className="card text-center text-sm text-slate-500">No QR codes found.</div>
                     )}
                     {codes.map((qr) => (
-                        <CodeCard
+                        <QrCodeCard
                             key={qr.id}
                             qr={qr}
                             toggling={togglingId === qr.id}

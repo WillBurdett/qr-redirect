@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function AddCodeForm({ companies, onSubmit }) {
+export default function AddQrCodeForm({ companies, onSubmit }) {
     const [selectedId, setSelectedId] = useState('');
     const [url, setUrl] = useState('');
 

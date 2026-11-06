@@ -12,7 +12,7 @@ function useDebounced(value, ms) {
     return debounced;
 }
 
-export function useCodes(filters, page, setPage) {
+export function useQrCodes(filters, page, setPage) {
     const [codes, setCodes] = useState([]);
     const [pageInfo, setPageInfo] = useState({ totalItems: 0, totalPages: 0 });
     const [loading, setLoading] = useState(false);
