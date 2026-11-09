@@ -27,8 +27,8 @@ public class QrCode {
     private Long id;
 
     /** The permanent token printed (inside the URL) on the QR code. Never changes. */
-    @Column(name = "short_code", nullable = false, unique = true, length = 16, updatable = false)
-    private String shortCode;
+    @Column(name = "short_qr_id", nullable = false, unique = true, length = 16, updatable = false)
+    private String shortQrId;
 
     /** The company this code belongs to. Fixed at creation. */
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
@@ -65,8 +65,8 @@ public class QrCode {
 
     public Long getId() { return id; }
 
-    public String getShortCode() { return shortCode; }
-    public void setShortCode(String shortCode) { this.shortCode = shortCode; }
+    public String getShortQrId() { return shortQrId; }
+    public void setShortQrId(String shortQrId) { this.shortQrId = shortQrId; }
 
     public Company getCompany() { return company; }
     public void setCompany(Company company) { this.company = company; }

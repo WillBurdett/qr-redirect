@@ -23,23 +23,23 @@ export const api = {
     listCompanies: () => request('/api/companies'),
     createCompany: (name, planType) =>
         request('/api/companies', { method: 'POST', body: JSON.stringify({ name, planType }) }),
-    listCodes: ({ companyId, id, active, page = 0, size = 10 } = {}) => {
+    listQrCodes: ({ companyId, id, active, page = 0, size = 10 } = {}) => {
         const params = new URLSearchParams({ page, size });
         if (companyId) params.set('companyId', companyId);
         if (id) params.set('id', id);
         if (active !== '' && active != null) params.set('active', active);
         return request(`/api/codes?${params}`);
     },
-    createCode: (companyId, targetUrl) =>
+    createQrCode: (companyId, targetUrl) =>
         request('/api/codes', { method: 'POST', body: JSON.stringify({ companyId, targetUrl }) }),
-    updateCode: (codeId, targetUrl) =>
+    updateQrCode: (codeId, targetUrl) =>
         request(`/api/codes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
-    codeStatus: (id, active) =>
+    qrCodeStatus: (id, active) =>
         request(`/api/codes/${id}`, { method: 'PUT', body: JSON.stringify({ active }) }),
-    downloadCodeZip: async (codeId) => {
+    downloadQrCodeZip: async (codeId) => {
         const res = await fetch(`/api/codes/${codeId}/download`, { credentials: 'include' });
         if (!res.ok) throw new Error(`Download failed (${res.status})`);
         return res.blob();
     },
-    deleteCode: (codeId) => request(`/api/codes/${codeId}`, { method: 'DELETE' }),
+    deleteQrCode: (codeId) => request(`/api/codes/${codeId}`, { method: 'DELETE' }),
 };

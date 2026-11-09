@@ -37,8 +37,8 @@ public class QrImageService {
     }
 
     /** The permanent URL that gets printed as a QR code, e.g. https://qr.example.com/q/Ab3xK9z */
-    public String shortUrl(String shortCode) {
-        return props.baseUrl() + "/q/" + shortCode;
+    public String shortUrl(String ShortQrId) {
+        return props.baseUrl() + "/q/" + ShortQrId;
     }
 
     public byte[] png(String content, int sizePx, ErrorCorrectionLevel ec) {

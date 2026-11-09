@@ -3,9 +3,7 @@ package com.example.qrredirect.web;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -20,16 +18,15 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.qrredirect.model.QrCode;
 import com.example.qrredirect.service.QrCodeService;
 import com.example.qrredirect.service.QrImageService;
-import com.example.qrredirect.web.CodeDtos.CodeResponse;
-import com.example.qrredirect.web.CodeDtos.CreateCodeRequest;
-import com.example.qrredirect.web.CodeDtos.UpdateCodeRequest;
+import com.example.qrredirect.web.QrCodeDtos.QrCodeResponse;
+import com.example.qrredirect.web.QrCodeDtos.UpdateCodeRequest;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import jakarta.validation.Valid;
 
 /** Operator-only management of QR codes. */
 @RestController
-@RequestMapping("/api/codes")
+@RequestMapping("/api/qrCodes")
 public class QrCodeApiController {
 
     private static final MediaType SVG = MediaType.parseMediaType("image/svg+xml");
@@ -43,30 +40,30 @@ public class QrCodeApiController {
     }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CodeResponse create(@Valid @RequestBody CreateCodeRequest request) {
+    public QrCodeResponse create(@Valid @RequestBody QrCodeDtos.CreateQrCodeRequest request) {
         return toResponse(service.create(request.companyId(), request.targetUrl()));
     }
 
     @GetMapping
-    public CodeDtos.PageResponse<CodeResponse> list(@RequestParam(required = false) Long companyId,
-                                                    @RequestParam(required = false) Long id,
-                                                    @RequestParam(required = false) Boolean active,
-                                                    @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
+    public QrCodeDtos.PageResponse<QrCodeResponse> list(@RequestParam(required = false) Long companyId,
+                                                        @RequestParam(required = false) Long id,
+                                                        @RequestParam(required = false) Boolean active,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size) {
         Page<QrCode> result = service.search(companyId, id, active, page, size);
-        return new CodeDtos.PageResponse<>(
+        return new QrCodeDtos.PageResponse<>(
                 result.getContent().stream().map(this::toResponse).toList(),
                 result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
     }
 
     @GetMapping("/{id}")
-    public CodeResponse get(@PathVariable Long id) {
+    public QrCodeResponse get(@PathVariable Long id) {
         return toResponse(service.get(id));
     }
 
     /** Reassign where a code points, or switch it off with {"active": false}. */
     @PutMapping("/{id}")
-    public CodeResponse update(@PathVariable Long id, @RequestBody UpdateCodeRequest request) {
+    public QrCodeResponse update(@PathVariable Long id, @RequestBody UpdateCodeRequest request) {
         return toResponse(service.update(id, request.targetUrl(), request.active()));
     }
 
@@ -87,7 +84,7 @@ public class QrCodeApiController {
                                    @RequestParam(defaultValue = "Q") String ec,
                                    @RequestParam(defaultValue = "false") boolean label) {
         QrCode qr = service.get(id);
-        String content = images.shortUrl(qr.getShortCode());
+        String content = images.shortUrl(qr.getShortQrId());
         String labelText = label ? String.valueOf(qr.getId()) : null;
         ErrorCorrectionLevel level = parseLevel(ec);
 
@@ -98,12 +95,12 @@ public class QrCodeApiController {
                 }
                 yield ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_PNG)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortCode() + ".png\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortQrId() + ".png\"")
                         .body(images.png(content, size, level, labelText));
             }
             case "svg" -> ResponseEntity.ok()
                     .contentType(SVG)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortCode() + ".svg\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortQrId() + ".svg\"")
                     .body(images.svg(content, level, labelText).getBytes(StandardCharsets.UTF_8));
             default -> throw bad("format must be png or svg");
         };
@@ -117,7 +114,7 @@ public class QrCodeApiController {
             throw bad("size must be between 64 and 4096");
         }
         QrCode qr = service.get(id);
-        String code = qr.getShortCode();
+        String code = qr.getShortQrId();
         String content = images.shortUrl(code);
         String labelText = String.valueOf(qr.getId());
         ErrorCorrectionLevel level = parseLevel(ec);
@@ -141,8 +138,8 @@ public class QrCodeApiController {
                 .body(out.toByteArray());
     }
 
-    private CodeResponse toResponse(QrCode qr) {
-        return CodeResponse.of(qr, images.shortUrl(qr.getShortCode()));
+    private QrCodeResponse toResponse(QrCode qr) {
+        return QrCodeResponse.of(qr, images.shortUrl(qr.getShortQrId()));
     }
 
     private static ErrorCorrectionLevel parseLevel(String ec) {

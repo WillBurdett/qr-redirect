@@ -7,5 +7,5 @@ import java.util.Optional;
 
 
 public interface PlanRepository extends JpaRepository<Plan, String> {
-    Optional<Plan>  findByCode(String planType);
+    Optional<Plan> findByPlanType(String planType);
 }

@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface QrCodeRepository extends JpaRepository<QrCode, Long>, JpaSpecificationExecutor<QrCode> {
 
-    Optional<QrCode> findByShortCode(String shortCode);
+    Optional<QrCode> findByShortQrId(String shortQrIr);
 
-    boolean existsByShortCode(String shortCode);
+    boolean existsByShortQrId(String shortQrIr);
 
     @Modifying
     @Transactional
-    @Query("update QrCode q set q.scanCount = q.scanCount + 1 where q.shortCode = :shortCode and q.active = true")
-    int incrementScans(@Param("shortCode") String shortCode);
+    @Query("update QrCode q set q.scanCount = q.scanCount + 1 where q.shortQrId = :shortQrId and q.active = true")
+    int incrementScans(@Param("shortQrId") String shortQrIr);
 }
