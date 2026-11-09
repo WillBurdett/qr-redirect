@@ -13,7 +13,7 @@ function useDebounced(value, ms) {
 }
 
 export function useQrCodes(filters, page, setPage) {
-    const [codes, setCodes] = useState([]);
+    const [qrCodes, setQrCodes] = useState([]);
     const [pageInfo, setPageInfo] = useState({ totalItems: 0, totalPages: 0 });
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState('');
@@ -27,7 +27,7 @@ export function useQrCodes(filters, page, setPage) {
         (async () => {
             setLoading(true);
             try {
-                const res = await api.listCodes({
+                const res = await api.listQrCodes({
                     companyId: filters.companyId,
                     id: codeId,
                     active: filters.status,
@@ -40,7 +40,7 @@ export function useQrCodes(filters, page, setPage) {
                     return;
                 }
                 setLoadError('');
-                setCodes(res.items);
+                setQrCodes(res.items);
                 setPageInfo({ totalItems: res.totalItems, totalPages: res.totalPages });
             } catch (err) {
                 if (!ignore) setLoadError(err.message);
@@ -51,5 +51,5 @@ export function useQrCodes(filters, page, setPage) {
         return () => { ignore = true; };
     }, [filters.companyId, filters.status, codeId, page, reloadKey, setPage]);
 
-    return { codes, pageInfo, loading, loadError, reload };
+    return { qrCodes, pageInfo, loading, loadError, reload };
 }

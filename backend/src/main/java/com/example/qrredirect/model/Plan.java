@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 public class Plan {
 
     @Id
-    private String code;
+    private String planType;
 
     @Column(name = "monthly_price_pounds")
     private BigDecimal monthlyPricePounds;
@@ -24,12 +24,12 @@ public class Plan {
     private Integer durationDays;
 
 
-    public String getCode() {
-        return code;
+    public String getPlanType() {
+        return planType;
     }
 
     public void setCode(String code) {
-        this.code = code;
+        this.planType = planType;
     }
 
     public Integer getDurationDays() {

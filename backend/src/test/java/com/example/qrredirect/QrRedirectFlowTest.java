@@ -74,7 +74,7 @@ class QrRedirectFlowTest {
         long companyId = createCompany("flow");
         JsonNode created = createCode(companyId, "https://example.com/a");
         long id = created.get("id").asLong();
-        String code = created.get("shortQrCode").asString();
+        String code = created.get("shortQrId").asString();
 
         assertThat(created.get("companyId").asLong()).isEqualTo(companyId);
 
@@ -94,7 +94,7 @@ class QrRedirectFlowTest {
                         .content("{\"targetUrl\":\"https://example.com/b\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.targetUrl").value("https://example.com/b"))
-                .andExpect(jsonPath("$.shortQrCode").value(code));
+                .andExpect(jsonPath("$.shortQrId").value(code));
         mvc.perform(get("/q/" + code))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "https://example.com/b"));
@@ -219,8 +219,8 @@ class QrRedirectFlowTest {
         long globexId = createCompany("globex");
         JsonNode acmeCode = createCode(acmeId, "https://acme.example.com");
         JsonNode globexCode = createCode(globexId, "https://globex.example.com");
-        String acme = acmeCode.get("shortQrCode").asString();
-        String globex = globexCode.get("shortQrCode").asString();
+        String acme = acmeCode.get("shortQrId").asString();
+        String globex = globexCode.get("shortQrId").asString();
 
         // The response says which company owns the code
         assertThat(acmeCode.get("companyId").asLong()).isEqualTo(acmeId);

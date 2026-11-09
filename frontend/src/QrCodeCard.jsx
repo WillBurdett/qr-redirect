@@ -6,7 +6,7 @@ export default function QrCodeCard({ qr, toggling, onEdit, onDownload, onToggle,
         <article className="card flex flex-col gap-5 sm:flex-row sm:items-center">
             <img
                 src={`/api/codes/${qr.id}/image?format=png&size=320&label=true`}
-                alt={qr.shortCode}
+                alt={qr.shortQrId}
                 width={160}
                 className={`w-40 shrink-0 self-center ${dim}`}
             />
@@ -33,7 +33,7 @@ export default function QrCodeCard({ qr, toggling, onEdit, onDownload, onToggle,
                     checked={qr.active}
                     onChange={() => onToggle(qr)}
                     disabled={toggling}
-                    label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortCode}`}
+                    label={`${qr.active ? 'Deactivate' : 'Activate'} code ${qr.shortQrId}`}
                 />
                 <span className={`w-[4.5rem] text-center text-sm font-semibold ${qr.active ? 'text-emerald-600' : 'text-red-600'}`}>
                     {qr.active ? 'Active' : 'Inactive'}

@@ -15,7 +15,7 @@ export default function Dashboard() {
     const [companies, setCompanies] = useState([]);
     const [filters, setFilters] = useState(NO_FILTERS);
     const [page, setPage] = useState(0);
-    const { codes, pageInfo, loading, loadError, reload } = useQrCodes(filters, page, setPage);
+    const { qrCodes, pageInfo, loading, loadError, reload } = useQrCodes(filters, page, setPage);
 
     const [companyId, setCompanyId] = useState('');
     const [togglingId, setTogglingId] = useState(null);
@@ -49,9 +49,9 @@ export default function Dashboard() {
         });
     }
 
-    async function addCode(companyId, url) {
+    async function addQrCode(companyId, url) {
         return run(async () => {
-            await api.createCode(Number(companyId), url);
+            await api.createQrCode(Number(companyId), url);
             setFilters(NO_FILTERS);
             setPage(0);
             reload();
@@ -68,7 +68,7 @@ export default function Dashboard() {
         setEditError('');
         setSaving(true);
         await run(async () => {
-            await api.updateCode(editing.id, url);
+            await api.updateQrCode(editing.id, url);
             setEditing(null);
             reload();
         }, { onError: setEditError });
@@ -78,19 +78,20 @@ export default function Dashboard() {
     async function toggleActive(qr) {
         setTogglingId(qr.id);
         await run(async () => {
-            await api.codeStatus(qr.id, !qr.active);
+            await api.qrCodeStatus(qr.id, !qr.active);
             reload();
         });
         setTogglingId(null);
     }
 
-    async function downloadQr(code) {
+    async function downloadQr(qrCode) {
+        console.log(qrCode, Object.keys(qrCode));
         await run(async () => {
-            const blob = await api.downloadCodeZip(code.id);
+            const blob = await api.downloadQrCodeZip(qrCode.id);
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `qr-${code.shortCode}.zip`;
+            a.download = `qr-${qrCode.shortQrId}.zip`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -102,7 +103,7 @@ export default function Dashboard() {
         const target = pendingDelete;
         setDeleting(true);
         await run(async () => {
-            await api.deleteCode(target.id);
+            await api.deleteQrCode(target.id);
             reload();
         })
         setDeleting(false);
@@ -131,7 +132,7 @@ export default function Dashboard() {
 
             <div className="grid gap-6 md:grid-cols-2">
                 <AddCompanyForm onSubmit={addCompany} />
-                <AddQrCodeForm companies={companies} onSubmit={addCode} />
+                <AddQrCodeForm companies={companies} onSubmit={addQrCode} />
             </div>
 
             <section>
@@ -144,10 +145,10 @@ export default function Dashboard() {
                 />
 
                 <div className={`grid gap-4 transition-opacity ${loading ? 'opacity-60' : ''}`}>
-                    {codes.length === 0 && !loading && (
+                    {qrCodes.length === 0 && !loading && (
                         <div className="card text-center text-sm text-slate-500">No QR codes found.</div>
                     )}
-                    {codes.map((qr) => (
+                    {qrCodes.map((qr) => (
                         <QrCodeCard
                             key={qr.id}
                             qr={qr}
@@ -166,7 +167,7 @@ export default function Dashboard() {
             <ConfirmDialog
                 open={pendingDelete !== null}
                 title="Delete this QR code?"
-                message={pendingDelete && `${pendingDelete.companyName} (${pendingDelete.shortCode}). Printed copies will stop working. This can't be undone.`}
+                message={pendingDelete && `${pendingDelete.companyName} (${pendingDelete.shortQrId}). Printed copies will stop working. This can't be undone.`}
                 busy={deleting}
                 onConfirm={confirmDelete}
                 onCancel={() => setPendingDelete(null)}

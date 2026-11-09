@@ -84,7 +84,7 @@ public class QrCodeApiController {
                                    @RequestParam(defaultValue = "Q") String ec,
                                    @RequestParam(defaultValue = "false") boolean label) {
         QrCode qr = service.get(id);
-        String content = images.shortUrl(qr.getShortCode());
+        String content = images.shortUrl(qr.getShortQrId());
         String labelText = label ? String.valueOf(qr.getId()) : null;
         ErrorCorrectionLevel level = parseLevel(ec);
 
@@ -95,12 +95,12 @@ public class QrCodeApiController {
                 }
                 yield ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_PNG)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortCode() + ".png\"")
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortQrId() + ".png\"")
                         .body(images.png(content, size, level, labelText));
             }
             case "svg" -> ResponseEntity.ok()
                     .contentType(SVG)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortCode() + ".svg\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + qr.getShortQrId() + ".svg\"")
                     .body(images.svg(content, level, labelText).getBytes(StandardCharsets.UTF_8));
             default -> throw bad("format must be png or svg");
         };
@@ -114,7 +114,7 @@ public class QrCodeApiController {
             throw bad("size must be between 64 and 4096");
         }
         QrCode qr = service.get(id);
-        String code = qr.getShortCode();
+        String code = qr.getShortQrId();
         String content = images.shortUrl(code);
         String labelText = String.valueOf(qr.getId());
         ErrorCorrectionLevel level = parseLevel(ec);
@@ -139,7 +139,7 @@ public class QrCodeApiController {
     }
 
     private QrCodeResponse toResponse(QrCode qr) {
-        return QrCodeResponse.of(qr, images.shortUrl(qr.getShortCode()));
+        return QrCodeResponse.of(qr, images.shortUrl(qr.getShortQrId()));
     }
 
     private static ErrorCorrectionLevel parseLevel(String ec) {

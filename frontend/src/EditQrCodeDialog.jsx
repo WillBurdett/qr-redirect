@@ -16,7 +16,7 @@ export default function EditQrCodeDialog({ code, busy = false, error = '', onSav
         >
             <form onSubmit={(e) => { e.preventDefault(); onSave(url); }}>
                 <h3 className="text-lg font-semibold">Edit QR code</h3>
-                <p className="mt-1 text-sm text-slate-600">{code.companyName} · {code.shortCode}</p>
+                <p className="mt-1 text-sm text-slate-600">{code.companyName} · {code.shortQrId}</p>
 
                 <label className="mt-4 block text-sm font-medium text-slate-700">
                     Destination URL

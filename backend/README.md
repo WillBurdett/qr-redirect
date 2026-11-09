@@ -31,14 +31,14 @@ KEY='X-API-Key: dev-key-change-me'
 # 1. Create a code
 curl -s -X POST localhost:8080/api/codes -H "$KEY" -H 'Content-Type: application/json' \
   -d '{"targetUrl":"https://example.com/spring-sale"}'
-# -> {"id":1,"shortQrCode":"...","shortUrl":"http://localhost:8080/q/...","targetUrl":"https://example.com/spring-sale","active":true,...}
+# -> {"id":1,"shortQrId":"...","shortUrl":"http://localhost:8080/q/...","targetUrl":"https://example.com/spring-sale","active":true,...}
 
 # 2. Download the printable image (use svg for print)
 curl -s -H "$KEY" -o code.png "localhost:8080/api/codes/1/image?format=png&size=600"
 curl -s -H "$KEY" -o code.svg "localhost:8080/api/codes/1/image?format=svg"
 
 # 3. Scan it (what a phone does): expect 302 + Location header
-curl -i localhost:8080/q/<shortQrCode>
+curl -i localhost:8080/q/<shortQrId>
 
 # 4. Reassign it. The printed code is unchanged.
 curl -s -X PUT localhost:8080/api/codes/1 -H "$KEY" -H 'Content-Type: application/json' \
@@ -106,7 +106,7 @@ src/main/java/com/example/qrredirect/
   repo/QrCodeRepository.java
   service/QrCodeService.java         create / resolve (cached) / update (evicts cache)
   service/QrImageService.java        ZXing PNG + SVG
-  service/ShortCodeGenerator.java
+  service/ShortQrIdGenerator.java
   service/TargetUrlPolicy.java       what URLs are allowed
   web/RedirectController.java        GET /q/{code}
   web/QrCodeApiController.java       /api/codes/**

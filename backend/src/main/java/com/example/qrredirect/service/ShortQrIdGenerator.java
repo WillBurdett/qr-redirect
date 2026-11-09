@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * 62^7 is roughly 3.5 trillion combinations.
  */
 @Component
-public class ShortCodeGenerator {
+public class ShortQrIdGenerator {
 
     public static final int LENGTH = 7;
     private static final char[] ALPHABET =

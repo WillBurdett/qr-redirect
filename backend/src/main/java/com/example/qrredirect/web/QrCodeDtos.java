@@ -20,7 +20,7 @@ public final class QrCodeDtos {
 
     public record QrCodeResponse(
             Long id,
-            String shortQrCode,
+            String shortQrId,
             String shortUrl,
             Long companyId,
             String companyName,
@@ -31,7 +31,7 @@ public final class QrCodeDtos {
             Instant updatedAt) {
 
         public static QrCodeResponse of(QrCode qr, String shortUrl) {
-            return new QrCodeResponse(qr.getId(), qr.getShortCode(), shortUrl,
+            return new QrCodeResponse(qr.getId(), qr.getShortQrId(), shortUrl,
                     qr.getCompany().getId(), qr.getCompany().getName(),
                     qr.getTargetUrl(), qr.isActive(), qr.getScanCount(), qr.getCreatedAt(), qr.getUpdatedAt());
         }

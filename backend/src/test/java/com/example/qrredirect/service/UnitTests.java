@@ -23,12 +23,12 @@ class UnitTests {
 
     private static final AppProperties PROPS = new AppProperties("https://qr.example.com/", false, null);
     @Test
-    void shortCodesAreRightLengthBase62AndDoNotRepeat() {
-        ShortCodeGenerator generator = new ShortCodeGenerator();
+    void shortQrIdAreRightLengthBase62AndDoNotRepeat() {
+        ShortQrIdGenerator generator = new ShortQrIdGenerator();
         Set<String> seen = new HashSet<>();
         for (int i = 0; i < 20_000; i++) {
             String code = generator.next();
-            assertThat(code).hasSize(ShortCodeGenerator.LENGTH).matches("[0-9A-Za-z]+");
+            assertThat(code).hasSize(ShortQrIdGenerator.LENGTH).matches("[0-9A-Za-z]+");
             seen.add(code);
         }
         assertThat(seen).hasSize(20_000);

@@ -33,11 +33,11 @@ public class QrCodeService {
 
     private final QrCodeRepository repo;
     private final CompanyService companies;
-    private final ShortCodeGenerator generator;
+    private final ShortQrIdGenerator generator;
     private final TargetUrlPolicy policy;
 
     public QrCodeService(QrCodeRepository repo, CompanyService companies,
-                         ShortCodeGenerator generator, TargetUrlPolicy policy) {
+                         ShortQrIdGenerator generator, TargetUrlPolicy policy) {
         this.repo = repo;
         this.companies = companies;
         this.generator = generator;
@@ -49,12 +49,12 @@ public class QrCodeService {
         String url = policy.validate(targetUrl);
 
         for (int attempt = 0; attempt < MAX_CODE_ATTEMPTS; attempt++) {
-            String shortCode = generator.next();
-            if (repo.existsByShortCode(shortCode)) {
+            String shortQrId = generator.next();
+            if (repo.existsByShortQrId(shortQrId)) {
                 continue;
             }
             QrCode qr = new QrCode();
-            qr.setShortCode(shortCode);
+            qr.setShortQrId(shortQrId);
             qr.setCompany(company);
             qr.setTargetUrl(url);
             try {
@@ -67,8 +67,8 @@ public class QrCodeService {
     }
 
 
-    public Optional<String> resolveTarget(String shortCode) {
-        return repo.findByShortCode(shortCode)
+    public Optional<String> resolveTarget(String shortQrId) {
+        return repo.findByShortQrId(shortQrId)
                 .filter(QrCode::isActive)
                 .map(QrCode::getTargetUrl);
     }
@@ -121,11 +121,11 @@ public class QrCodeService {
 
     Logger log;
 
-    public void recordScan(String shortCode) {
+    public void recordScan(String ShortQrId) {
         try {
-            repo.incrementScans(shortCode);
+            repo.incrementScans(ShortQrId);
         } catch (RuntimeException e) {
-            log.warn("Could not record scan for {}", shortCode, e);   // never break a redirect over a counter
+            log.warn("Could not record scan for {}", ShortQrId, e);   // never break a redirect over a counter
         }
     }
 }
