@@ -59,7 +59,7 @@ class QrRedirectFlowTest {
     }
 
     private JsonNode createCode(long companyId, String targetUrl) throws Exception {
-        String body = mvc.perform(post("/api/codes")
+        String body = mvc.perform(post("/api/qrCodes")
                         .header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"companyId\":" + companyId + ",\"targetUrl\":\"" + targetUrl + "\"}"))
@@ -88,7 +88,7 @@ class QrRedirectFlowTest {
                 .andExpect(header().string("Location", "https://example.com/a"));
 
         // Reassign: the very next scan must see the new target (proves cache eviction)
-        mvc.perform(put("/api/codes/" + id)
+        mvc.perform(put("/api/qrCodes/" + id)
                         .header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"targetUrl\":\"https://example.com/b\"}"))
@@ -100,7 +100,7 @@ class QrRedirectFlowTest {
                 .andExpect(header().string("Location", "https://example.com/b"));
 
         // Deactivate: scans now get the friendly 404 page
-        mvc.perform(put("/api/codes/" + id)
+        mvc.perform(put("/api/qrCodes/" + id)
                         .header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"active\":false}"))
@@ -112,7 +112,7 @@ class QrRedirectFlowTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
 
         // Reactivate
-        mvc.perform(put("/api/codes/" + id)
+        mvc.perform(put("/api/qrCodes/" + id)
                         .header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"active\":true}"))
@@ -131,8 +131,8 @@ class QrRedirectFlowTest {
 
     @Test
     void apiRequiresTheOperatorKeyButRedirectsArePublic() throws Exception {
-        mvc.perform(get("/api/codes")).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/codes").header(KEY, "wrong")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/qrCodes")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/qrCodes").header(KEY, "wrong")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/companies")).andExpect(status().isUnauthorized());
         mvc.perform(post("/api/companies").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"nope\"}"))
@@ -141,7 +141,7 @@ class QrRedirectFlowTest {
                         .content("{\"companyId\":1,\"targetUrl\":\"https://example.com\"}"))
                 .andExpect(status().isUnauthorized());
 
-        mvc.perform(get("/api/codes").header(KEY, API_KEY)).andExpect(status().isOk());
+        mvc.perform(get("/api/qrCodes").header(KEY, API_KEY)).andExpect(status().isOk());
         mvc.perform(get("/api/companies").header(KEY, API_KEY)).andExpect(status().isOk());
     }
 
@@ -159,7 +159,7 @@ class QrRedirectFlowTest {
         // Same name again, in a different case: conflict
         mvc.perform(post("/api/companies").header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"" + name.toUpperCase() + "\",\"planType\":\"PILOT\"}"))
+                        .content("{\"name\":\"" + name.toUpperCase() + "\",\"planType\":\"BRANCH\"}"))
                 .andExpect(status().isConflict());
 
         // Blank or missing name: bad request
@@ -178,9 +178,9 @@ class QrRedirectFlowTest {
                 .andReturn().getResponse().getContentAsString();
         assertThat(list).contains(name);
 
-        // Unknown company: 404 for reads, and codes can't be created for it
+        // Unknown company: 404 for reads, and qr codes can't be created for it
         mvc.perform(get("/api/companies/999999999").header(KEY, API_KEY)).andExpect(status().isNotFound());
-        mvc.perform(post("/api/codes").header(KEY, API_KEY)
+        mvc.perform(post("/api/qrCodes").header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"companyId\":999999999,\"targetUrl\":\"https://example.com\"}"))
                 .andExpect(status().isNotFound());
@@ -198,7 +198,7 @@ class QrRedirectFlowTest {
                 "{\"companyId\":" + companyId + "}",
                 "{\"targetUrl\":\"https://example.com\"}",
                 "{}" }) {
-            mvc.perform(post("/api/codes").header(KEY, API_KEY)
+            mvc.perform(post("/api/qrCodes").header(KEY, API_KEY)
                             .contentType(MediaType.APPLICATION_JSON).content(body))
                     .andExpect(status().isBadRequest());
         }
@@ -207,7 +207,7 @@ class QrRedirectFlowTest {
     @Test
     void updateRejectsUnsafeTarget() throws Exception {
         long id = createCode(createCompany("update"), "https://example.com/ok").get("id").asLong();
-        mvc.perform(put("/api/codes/" + id).header(KEY, API_KEY)
+        mvc.perform(put("/api/qrCodes/" + id).header(KEY, API_KEY)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"targetUrl\":\"http://insecure.example.com\"}"))
                 .andExpect(status().isBadRequest());
@@ -227,13 +227,13 @@ class QrRedirectFlowTest {
         assertThat(acmeCode.get("companyName").asString()).startsWith("acme-");
 
         // Filtered list: only that company's codes
-        String acmeList = mvc.perform(get("/api/codes?companyId=" + acmeId).header(KEY, API_KEY))
+        String acmeList = mvc.perform(get("/api/qrCodes?companyId=" + acmeId).header(KEY, API_KEY))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(acmeList).contains(acme).doesNotContain(globex);
 
         // Unfiltered list: everything
-        String all = mvc.perform(get("/api/codes").header(KEY, API_KEY))
+        String all = mvc.perform(get("/api/qrCodes").header(KEY, API_KEY))
                 .andReturn().getResponse().getContentAsString();
         assertThat(all).contains(acme).contains(globex);
 
@@ -247,7 +247,7 @@ class QrRedirectFlowTest {
         JsonNode created = createCode(createCompany("png"), "https://example.com/png");
         long id = created.get("id").asLong();
 
-        byte[] png = mvc.perform(get("/api/codes/" + id + "/image?format=png&size=400").header(KEY, API_KEY))
+        byte[] png = mvc.perform(get("/api/qrCodes/" + id + "/image?format=png&size=400").header(KEY, API_KEY))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_PNG))
                 .andReturn().getResponse().getContentAsByteArray();
@@ -265,13 +265,13 @@ class QrRedirectFlowTest {
     void svgImageIsServedAndBadImageParamsAreRejected() throws Exception {
         long id = createCode(createCompany("svg"), "https://example.com/svg").get("id").asLong();
 
-        mvc.perform(get("/api/codes/" + id + "/image?format=svg&ec=Q").header(KEY, API_KEY))
+        mvc.perform(get("/api/qrCodes/" + id + "/image?format=svg&ec=Q").header(KEY, API_KEY))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("image/svg+xml"))
                 .andExpect(content().string(startsWith("<svg")));
 
-        mvc.perform(get("/api/codes/" + id + "/image?format=gif").header(KEY, API_KEY)).andExpect(status().isBadRequest());
-        mvc.perform(get("/api/codes/" + id + "/image?size=10").header(KEY, API_KEY)).andExpect(status().isBadRequest());
-        mvc.perform(get("/api/codes/" + id + "/image?ec=Z").header(KEY, API_KEY)).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/qrCodes/" + id + "/image?format=gif").header(KEY, API_KEY)).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/qrCodes/" + id + "/image?size=10").header(KEY, API_KEY)).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/qrCodes/" + id + "/image?ec=Z").header(KEY, API_KEY)).andExpect(status().isBadRequest());
     }
 }

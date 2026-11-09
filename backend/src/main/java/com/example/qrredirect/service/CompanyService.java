@@ -42,7 +42,7 @@ public class CompanyService {
             throw duplicate();
         }
 
-        Plan currentPlan = planRepo.findByCode(planType)
+        Plan currentPlan = planRepo.findByPlanType(planType)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "Unknown plan: " + planType));
 

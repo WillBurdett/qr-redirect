@@ -109,7 +109,7 @@ class CompanyServiceTest {
 
     private void stubPlan(String planType, Integer durationDays) {
         Plan plan = mock(Plan.class); when(plan.getDurationDays()).thenReturn(durationDays);
-        when(planRepo.findByCode(planType)).thenReturn(Optional.of(plan));
+        when(planRepo.findByPlanType(planType)).thenReturn(Optional.of(plan));
         when(repo.existsByNameIgnoreCase("Miles & Barr")).thenReturn(false);
         when(repo.saveAndFlush(any(Company.class))).thenAnswer(i -> i.getArgument(0));
     }

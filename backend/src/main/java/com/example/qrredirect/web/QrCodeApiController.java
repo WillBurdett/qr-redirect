@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 
 /** Operator-only management of QR codes. */
 @RestController
-@RequestMapping("/api/codes")
+@RequestMapping("/api/qrCodes")
 public class QrCodeApiController {
 
     private static final MediaType SVG = MediaType.parseMediaType("image/svg+xml");
