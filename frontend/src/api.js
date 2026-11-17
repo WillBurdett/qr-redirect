@@ -28,18 +28,18 @@ export const api = {
         if (companyId) params.set('companyId', companyId);
         if (id) params.set('id', id);
         if (active !== '' && active != null) params.set('active', active);
-        return request(`/api/codes?${params}`);
+        return request(`/api/qrCodes?${params}`);
     },
     createQrCode: (companyId, targetUrl) =>
-        request('/api/codes', { method: 'POST', body: JSON.stringify({ companyId, targetUrl }) }),
+        request('/api/qrCodes', { method: 'POST', body: JSON.stringify({ companyId, targetUrl }) }),
     updateQrCode: (codeId, targetUrl) =>
-        request(`/api/codes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
+        request(`/api/qrCodes/${codeId}`, { method: 'PUT', body: JSON.stringify({ targetUrl }) }),
     qrCodeStatus: (id, active) =>
-        request(`/api/codes/${id}`, { method: 'PUT', body: JSON.stringify({ active }) }),
+        request(`/api/qrCodes/${id}`, { method: 'PUT', body: JSON.stringify({ active }) }),
     downloadQrCodeZip: async (codeId) => {
-        const res = await fetch(`/api/codes/${codeId}/download`, { credentials: 'include' });
+        const res = await fetch(`/api/qrCodes/${codeId}/download`, { credentials: 'include' });
         if (!res.ok) throw new Error(`Download failed (${res.status})`);
         return res.blob();
     },
-    deleteQrCode: (codeId) => request(`/api/codes/${codeId}`, { method: 'DELETE' }),
+    deleteQrCode: (codeId) => request(`/api/qrCodes/${codeId}`, { method: 'DELETE' }),
 };
