@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.example.qrredirect.e2e.tests.PublicRedirectE2ETest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.548 s -- in com.example.qrredirect.e2e.tests.PublicRedirectE2ETest

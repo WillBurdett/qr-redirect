@@ -32,6 +32,6 @@ services:
       DB_USER: qr
       DB_PASSWORD: qr
       APP_BASE_URL: http://localhost:8080
-      COOKIE_SECURE: "false"          # tests run over plain http://localhost
-      ADMIN_EMAIL: e2e@qr.test        # must match E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD in e2e/
+      COOKIE_SECURE: "false"
+      ADMIN_EMAIL: e2e@qr.test
       ADMIN_PASSWORD: e2e-password

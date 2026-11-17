@@ -1,0 +1,8 @@
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/pages/DashboardPage.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/pages/LoginPage.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/support/ApiClient.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/support/E2ETestBase.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/support/Phone.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/tests/AuthE2ETest.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/tests/PublicRedirectE2ETest.java
+/Users/cindyburdett/Documents/software/qr-redirect/e2e/src/test/java/com/example/qrredirect/e2e/tests/QrLifecycleE2ETest.java
