@@ -20,7 +20,7 @@ class AuthE2ETest extends E2ETestBase {
     @Tag("smoke")
     @DisplayName("REQ-AUTH-01: valid admin credentials open the dashboard")
     void validLoginShowsDashboard() {
-        DashboardPage dashboard = new LoginPage(page).open().loginAs(ADMIN_EMAIL, ADMIN_PASSWORD);
+        DashboardPage dashboard = new LoginPage(page).open().loginAs("admin_fail", ADMIN_PASSWORD);
 
         PlaywrightAssertions.assertThat(dashboard.logoutButton()).isVisible();
         PlaywrightAssertions.assertThat(page.getByText(ADMIN_EMAIL)).isVisible();
