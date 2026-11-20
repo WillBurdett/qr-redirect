@@ -1,0 +1,37 @@
+# Throwaway stack for end-to-end tests: the real production image + a real Postgres, nothing persisted.
+#   docker compose -f docker-compose.e2e.yml up -d --build
+#   (wait for http://localhost:8080/actuator/health), then: cd e2e && mvn verify
+#   docker compose -f docker-compose.e2e.yml down -v
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: qrdb
+      POSTGRES_USER: qr
+      POSTGRES_PASSWORD: qr
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qr -d qrdb"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/qrdb
+      DB_USER: qr
+      DB_PASSWORD: qr
+      APP_BASE_URL: http://localhost:8080
+      COOKIE_SECURE: "false"
+      ADMIN_EMAIL: e2e@qr.test
+      ADMIN_PASSWORD: e2e-password

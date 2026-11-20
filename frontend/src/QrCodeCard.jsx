@@ -5,7 +5,7 @@ export default function QrCodeCard({ qr, toggling, onEdit, onDownload, onToggle,
     return (
         <article className="card flex flex-col gap-5 sm:flex-row sm:items-center">
             <img
-                src={`/api/codes/${qr.id}/image?format=png&size=320&label=true`}
+                src={`/api/qrCodes/${qr.id}/image?format=png&size=320&label=true`}
                 alt={qr.shortQrId}
                 width={160}
                 className={`w-40 shrink-0 self-center ${dim}`}

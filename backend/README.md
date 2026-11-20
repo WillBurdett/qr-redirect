@@ -34,18 +34,18 @@ curl -s -X POST localhost:8080/api/codes -H "$KEY" -H 'Content-Type: application
 # -> {"id":1,"shortQrId":"...","shortUrl":"http://localhost:8080/q/...","targetUrl":"https://example.com/spring-sale","active":true,...}
 
 # 2. Download the printable image (use svg for print)
-curl -s -H "$KEY" -o code.png "localhost:8080/api/codes/1/image?format=png&size=600"
-curl -s -H "$KEY" -o code.svg "localhost:8080/api/codes/1/image?format=svg"
+curl -s -H "$KEY" -o code.png "localhost:8080/api/qrCodes/1/image?format=png&size=600"
+curl -s -H "$KEY" -o code.svg "localhost:8080/api/qrCodes/1/image?format=svg"
 
 # 3. Scan it (what a phone does): expect 302 + Location header
 curl -i localhost:8080/q/<shortQrId>
 
 # 4. Reassign it. The printed code is unchanged.
-curl -s -X PUT localhost:8080/api/codes/1 -H "$KEY" -H 'Content-Type: application/json' \
+curl -s -X PUT localhost:8080/api/qrCodes/1 -H "$KEY" -H 'Content-Type: application/json' \
   -d '{"targetUrl":"https://example.com/summer-sale"}'
 
 # 5. Switch it off (scans show a friendly 404 page) or back on
-curl -s -X PUT localhost:8080/api/codes/1 -H "$KEY" -H 'Content-Type: application/json' -d '{"active":false}'
+curl -s -X PUT localhost:8080/api/qrCodes/1 -H "$KEY" -H 'Content-Type: application/json' -d '{"active":false}'
 ```
 
 ## API
@@ -53,11 +53,11 @@ curl -s -X PUT localhost:8080/api/codes/1 -H "$KEY" -H 'Content-Type: applicatio
 | Method | Path | Notes |
 |---|---|---|
 | `GET` | `/q/{code}` | Public. 302 to the target, or a 404 page if unknown/inactive. |
-| `POST` | `/api/codes` | `{"targetUrl": "..."}` creates a code. |
-| `GET` | `/api/codes` | Lists your company's codes. |
-| `GET` | `/api/codes/{id}` | One code. |
-| `PUT` | `/api/codes/{id}` | `{"targetUrl": "...", "active": true}`. Both fields optional. |
-| `GET` | `/api/codes/{id}/image` | `format=png\|svg`, `size=64..4096` (PNG), `ec=L\|M\|Q\|H`. |
+| `POST` | `/api/qrCodes` | `{"targetUrl": "..."}` creates a code. |
+| `GET` | `/api/qrCodes` | Lists your company's codes. |
+| `GET` | `/api/qrCodes/{id}` | One code. |
+| `PUT` | `/api/qrCodes/{id}` | `{"targetUrl": "...", "active": true}`. Both fields optional. |
+| `GET` | `/api/qrCodes/{id}/image` | `format=png\|svg`, `size=64..4096` (PNG), `ec=L\|M\|Q\|H`. |
 
 All `/api/**` calls need an `X-API-Key` header. The key identifies the company, and every query is scoped
 to it, so one company can't see or change another's codes.
@@ -109,7 +109,7 @@ src/main/java/com/example/qrredirect/
   service/ShortQrIdGenerator.java
   service/TargetUrlPolicy.java       what URLs are allowed
   web/RedirectController.java        GET /q/{code}
-  web/QrCodeApiController.java       /api/codes/**
+  web/QrCodeApiController.java       /api/qrCodes/**
   web/ApiKeyFilter.java              per-company API keys
   web/CodeDtos.java
 ```

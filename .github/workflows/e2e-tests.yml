@@ -1,0 +1,66 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: e2e/pom.xml
+
+      - name: Start the app (production image + Postgres)
+        run: docker compose -f docker-compose.e2e.yml up -d --build
+
+      - name: Wait for the app to be healthy
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/actuator/health > /dev/null; then
+              echo "App is up"; exit 0
+            fi
+            sleep 3
+          done
+          docker compose -f docker-compose.e2e.yml logs app
+          exit 1
+
+      - name: Install Playwright browser
+        working-directory: ./e2e
+        run: >
+          mvn -B -q exec:java -Dexec.classpathScope=test
+          -Dexec.mainClass=com.microsoft.playwright.CLI
+          -Dexec.args="install --with-deps chromium"
+
+      - name: Run E2E tests
+        working-directory: ./e2e
+        run: mvn -B verify
+
+      - name: Upload reports and failure traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: |
+            e2e/target/surefire-reports
+            e2e/target/playwright
+
+      - name: App logs (on failure)
+        if: failure()
+        run: docker compose -f docker-compose.e2e.yml logs app
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml down -v
